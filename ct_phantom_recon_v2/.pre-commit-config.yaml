@@ -1,0 +1,37 @@
+# pre-commit hooks 配置 — 拦住破坏 pytest 的 commit
+# 安装: D:\OpenGATE\env\python.exe -m pip install pre-commit
+# 初始化: D:\OpenGATE\env\Scripts\pre-commit.exe install
+# 手动跑全部 hooks: D:\OpenGATE\env\Scripts\pre-commit.exe run --all-files
+# 跳过 hook (紧急): git commit --no-verify -m "..."
+# 文档: https://pre-commit.com/
+
+repos:
+  # ===== 本地 pytest hook (项目专属, 拦住破坏测试的 commit) =====
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (scripts/) — 21/21 必须 PASS
+        # Windows 路径: 用 forward slash, 反斜杠会被 YAML 当 escape
+        entry: D:/OpenGATE/env/python.exe -m pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        # 触发条件: scripts/ 或 tests/ 任何文件改动
+        files: ^(scripts/.*\.py|tests/.*\.py|scripts/_checkpoints\.py)
+        stages: [pre-commit]
+
+  # ===== 通用 hygiene (用官方 pre-commit-hooks 仓库) =====
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        # 排除 .raw / .nii / .mhd 二进制文件
+        exclude: \.(raw|nii|nii\.gz|mhd)$
+      - id: end-of-file-fixer
+        exclude: \.(raw|nii|nii\.gz|mhd)$
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        # 防止误 commit 大文件 (二进制数据应在 .gitignore)
+        args: [--maxkb=1024]
+      - id: check-yaml
+      - id: check-json

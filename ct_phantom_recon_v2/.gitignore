@@ -1,0 +1,76 @@
+# ============ Python ============
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.tox/
+
+# ============ 虚拟环境 ============
+.venv/
+venv/
+env/
+ENV/
+
+# ============ IDE / 编辑器 ============
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============ Node / JS ============
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+.pnp.*
+
+# ============ 临时诊断/截图 ============
+.playwright-mcp/
+dashboard_v14_*.png
+*.tmp
+*.bak
+scratchpads/
+
+# ============ FLARE22 原始数据 (大, 一次性下载) ============
+output/real_ct/01_raw/*.nii
+output/real_ct/01_raw/*.nii.gz
+
+# ============ CT 体积二进制 (大, 可从 01_raw 重生成) ============
+output/real_ct/02_calibrated/*.raw
+output/real_ct/02_calibrated/*.nii
+
+# ============ 投影 μ-map 二进制 (大, 可重生成) ============
+output/real_ct/03_proj/*.raw
+output/real_ct/03_proj/angle_*/
+output/real_ct/03_proj/sinogram*.raw
+
+# ============ 重建中间结果 (大, 可重生成) ============
+output/real_ct/04_recon/_sart_matrix_cache/
+output/real_ct/04_recon/sinogram*.raw
+output/real_ct/04_recon/sinogram*.mhd
+output/real_ct/04_recon/_tv_scan/
+output/real_ct/04_recon/*.nii
+
+# ============ 后处理参数扫描 (冗余) ============
+output/real_ct/05_post/*_m*_s*_c-*.raw
+output/real_ct/05_post/*_m*_s*_c-*.mhd
+output/real_ct/05_post/calibration_log_*.json
+
+# ============ 评估中间 (重生成) ============
+output/real_ct/06_eval/error_maps/
+
+# ============ PPT 制作工作区 (一次性产出) ============
+ppt_workspace/node_modules/
+ppt_workspace/slides/*.pptx
+ppt_workspace/slides/*.pdf
+
+# ============ 任务规划 (占位代码, 不进生产) ============
+tasks/gui/stage*/**/__pycache__/
+tasks/gui/stage*/**/venv/
