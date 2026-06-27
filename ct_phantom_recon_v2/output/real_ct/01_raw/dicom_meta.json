@@ -1,0 +1,87 @@
+{
+  "study": "FLARE22",
+  "patient_id": "Tr_0009",
+  "modality": "CT",
+  "anatomy": "Abdomen",
+  "phase": "Portal venous",
+  "manufacturer": "Mixed (FLARE22 multi-center)",
+  "kVp": 120,
+  "mAs": 150,
+  "slice_thickness_mm": 2.5,
+  "pixel_spacing_mm": 0.81,
+  "reconstruction_kernel": "soft tissue (B30f-like)",
+  "patient_position": "HFS (head-first supine)",
+  "rescale_intercept": -1024,
+  "rescale_slope": 1,
+  "source_url": "https://flare22.grand-challenge.org/",
+  "notes": "FLARE22 数据走 NIfTI 格式 (.nii), 含 spacing/origin/affine 完整几何, 临床参数取自 FLARE22 协议文档",
+  "loaded_at": "2026-06-22T22:43:05.868079",
+  "files": {
+    "ct": "FLARE22_Tr_0009_0000.nii",
+    "mask": "FLARE22_Tr_0009.nii"
+  },
+  "geometry": {
+    "size_xyz": [
+      512,
+      512,
+      87
+    ],
+    "shape_zxy": [
+      87,
+      512,
+      512
+    ],
+    "spacing_xyz_mm": [
+      0.8066409826278687,
+      0.8066409826278687,
+      2.5
+    ],
+    "origin_xyz_mm": [
+      412.19354248046875,
+      412.19354248046875,
+      0.0
+    ],
+    "direction": [
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "dtype": "float32",
+    "hu_min": -1024.0,
+    "hu_max": 1328.0,
+    "hu_mean": -533.0549926757812,
+    "hu_std": 488.99920654296875
+  },
+  "mask_summary": {
+    "n_classes": 14,
+    "organ_voxels": {
+      "background": 21093721,
+      "Liver": 951329,
+      "Right Kidney": 118275,
+      "Spleen": 90086,
+      "Pancreas": 107062,
+      "Aorta": 102936,
+      "Inferior Vena Cava": 51331,
+      "Right Adrenal Gland": 2498,
+      "Left Adrenal Gland": 3807,
+      "Gallbladder": 17159,
+      "Esophagus": 7312,
+      "Stomach": 95650,
+      "Duodenum": 45927,
+      "Left Kidney": 119435
+    },
+    "total_organ_voxels": 1712807,
+    "background_ratio": 0.9248983887420303
+  },
+  "fov_mm": {
+    "x": 413.00018310546875,
+    "y": 413.00018310546875,
+    "z": 217.5
+  }
+}

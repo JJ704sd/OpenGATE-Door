@@ -1,0 +1,394 @@
+{
+  "date": "2026-06-27",
+  "baseline": "v13 (FBP)",
+  "global": {
+    "MAE_HU": 80.38250732421875,
+    "bias_HU": -5.941531181335449,
+    "MAE_target_clinical": 30.0,
+    "MAE_gap_to_clinical_HU": 50.38250732421875,
+    "n_pixels_FOV": 31397
+  },
+  "per_organ_px_MAE": {
+    "Liver": {
+      "n_voxels": 3938,
+      "MAE_pix": 70.56858825683594,
+      "bias_pix": -70.32128143310547,
+      "pred_mean": 51.1754150390625,
+      "truth_mean": 121.49669647216797,
+      "pred_min": 17.122608184814453,
+      "pred_max": 71.57817077636719,
+      "truth_min": -13.0,
+      "truth_max": 216.0
+    },
+    "R_Kidney": {
+      "n_voxels": 651,
+      "MAE_pix": 87.69696044921875,
+      "bias_pix": -86.11847686767578,
+      "pred_mean": 50.78474807739258,
+      "truth_mean": 136.90322875976562,
+      "pred_min": 41.43086624145508,
+      "pred_max": 59.23291778564453,
+      "truth_min": 4.0,
+      "truth_max": 219.0
+    },
+    "Spleen": {
+      "n_voxels": 0,
+      "MAE_pix": null
+    },
+    "Pancreas": {
+      "n_voxels": 1861,
+      "MAE_pix": 39.14943313598633,
+      "bias_pix": -9.911518096923828,
+      "pred_mean": 44.9068603515625,
+      "truth_mean": 54.81837844848633,
+      "pred_min": 40.874141693115234,
+      "pred_max": 46.13307189941406,
+      "truth_min": -123.0,
+      "truth_max": 177.0
+    },
+    "Aorta": {
+      "n_voxels": 716,
+      "MAE_pix": 76.01612854003906,
+      "bias_pix": -73.89762115478516,
+      "pred_mean": 44.31187057495117,
+      "truth_mean": 118.2094955444336,
+      "pred_min": 43.62458419799805,
+      "pred_max": 45.70111846923828,
+      "truth_min": -73.0,
+      "truth_max": 208.0
+    },
+    "IVC": {
+      "n_voxels": 840,
+      "MAE_pix": 64.94115447998047,
+      "bias_pix": -64.83639526367188,
+      "pred_mean": 45.29574966430664,
+      "truth_mean": 110.13214111328125,
+      "pred_min": 44.03463363647461,
+      "pred_max": 46.65301513671875,
+      "truth_min": 16.0,
+      "truth_max": 178.0
+    },
+    "R_Adrenal": {
+      "n_voxels": 0,
+      "MAE_pix": null
+    },
+    "L_Adrenal": {
+      "n_voxels": 0,
+      "MAE_pix": null
+    },
+    "Gallbladder": {
+      "n_voxels": 996,
+      "MAE_pix": 30.387943267822266,
+      "bias_pix": 19.722774505615234,
+      "pred_mean": 53.81614685058594,
+      "truth_mean": 34.0933723449707,
+      "pred_min": 46.19395446777344,
+      "pred_max": 60.59733200073242,
+      "truth_min": -46.0,
+      "truth_max": 153.0
+    },
+    "Esophagus": {
+      "n_voxels": 0,
+      "MAE_pix": null
+    },
+    "Stomach": {
+      "n_voxels": 770,
+      "MAE_pix": 33.06068420410156,
+      "bias_pix": -5.9185357093811035,
+      "pred_mean": 46.6334114074707,
+      "truth_mean": 52.55194854736328,
+      "pred_min": 45.366676330566406,
+      "pred_max": 47.91986083984375,
+      "truth_min": -419.0,
+      "truth_max": 142.0
+    },
+    "Duodenum": {
+      "n_voxels": 1610,
+      "MAE_pix": 83.08168029785156,
+      "bias_pix": 60.743995666503906,
+      "pred_mean": 47.25828170776367,
+      "truth_mean": -13.485713958740234,
+      "pred_min": 44.48991775512695,
+      "pred_max": 52.72909164428711,
+      "truth_min": -961.0,
+      "truth_max": 192.0
+    },
+    "L_Kidney": {
+      "n_voxels": 1888,
+      "MAE_pix": 70.66326904296875,
+      "bias_pix": -62.65598678588867,
+      "pred_mean": 51.2873420715332,
+      "truth_mean": 113.94332885742188,
+      "pred_min": 26.075847625732422,
+      "pred_max": 68.53296661376953,
+      "truth_min": -103.0,
+      "truth_max": 232.0
+    }
+  },
+  "per_HU_bucket_MAE": {
+    "air <-200": {
+      "n_pixels": 305,
+      "MAE": 566.8583374023438,
+      "bias": 566.8583374023438
+    },
+    "fat [-200,-50)": {
+      "n_pixels": 4683,
+      "MAE": 131.78189086914062,
+      "bias": 131.78189086914062
+    },
+    "soft_lo [-50,50)": {
+      "n_pixels": 8749,
+      "MAE": 43.23185729980469,
+      "bias": 43.08308029174805
+    },
+    "soft_hi [50,150)": {
+      "n_pixels": 13519,
+      "MAE": 50.69491195678711,
+      "bias": -50.546905517578125
+    },
+    "contrast [150,400)": {
+      "n_pixels": 4024,
+      "MAE": 154.9085235595703,
+      "bias": -154.9085235595703
+    },
+    "bone [400,1500)": {
+      "n_pixels": 117,
+      "MAE": 400.0949401855469,
+      "bias": -400.0949401855469
+    },
+    "metal [1500,4000]": {
+      "n_pixels": 0,
+      "MAE": null
+    }
+  },
+  "per_radial_MAE": {
+    "r=[0,30)": {
+      "n_pixels": 2809,
+      "MAE": 67.18195343017578
+    },
+    "r=[30,60)": {
+      "n_pixels": 8468,
+      "MAE": 71.66603088378906
+    },
+    "r=[60,90)": {
+      "n_pixels": 14156,
+      "MAE": 83.18885803222656
+    },
+    "r=[90,120)": {
+      "n_pixels": 5964,
+      "MAE": 92.31486511230469
+    }
+  },
+  "bucket_contribution_pct": {
+    "air <-200": {
+      "abs_err_sum": 172891.796875,
+      "contrib_pct": 6.850538326697426
+    },
+    "fat [-200,-50)": {
+      "abs_err_sum": 617134.625,
+      "contrib_pct": 24.45289179538781
+    },
+    "soft_lo [-50,50)": {
+      "abs_err_sum": 378235.53125,
+      "contrib_pct": 14.986928530913778
+    },
+    "soft_hi [50,150)": {
+      "abs_err_sum": 685344.5,
+      "contrib_pct": 27.155590080631374
+    },
+    "contrast [150,400)": {
+      "abs_err_sum": 623351.875,
+      "contrib_pct": 24.6992395700162
+    },
+    "bone [400,1500)": {
+      "abs_err_sum": 46811.109375,
+      "contrib_pct": 1.8548092198990438
+    },
+    "metal [1500,4000]": {
+      "abs_err_sum": 0.0,
+      "contrib_pct": 0.0
+    }
+  },
+  "top_k_high_residual_pixels": [
+    {
+      "row": 172,
+      "col": 169,
+      "dist_from_center": 60.14149981501958,
+      "pred": 46.9565315246582,
+      "truth": -961.0,
+      "err": 1007.95654296875,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 172,
+      "col": 168,
+      "dist_from_center": 59.464274989274024,
+      "pred": 46.723602294921875,
+      "truth": -942.0,
+      "err": 988.7236328125,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 197,
+      "col": 70,
+      "dist_from_center": 90.13878188659973,
+      "pred": 49.79243087768555,
+      "truth": -920.0,
+      "err": 969.7924194335938,
+      "organ": "background"
+    },
+    {
+      "row": 171,
+      "col": 169,
+      "dist_from_center": 59.413803110051795,
+      "pred": 46.903663635253906,
+      "truth": -922.0,
+      "err": 968.9036865234375,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 170,
+      "col": 170,
+      "dist_from_center": 59.39696961966999,
+      "pred": 47.1866340637207,
+      "truth": -921.0,
+      "err": 968.1866455078125,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 171,
+      "col": 168,
+      "dist_from_center": 58.728187440104094,
+      "pred": 46.69723892211914,
+      "truth": -918.0,
+      "err": 964.697265625,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 178,
+      "col": 168,
+      "dist_from_center": 64.03124237432849,
+      "pred": 47.72404479980469,
+      "truth": -914.0,
+      "err": 961.7240600585938,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 177,
+      "col": 168,
+      "dist_from_center": 63.25345840347388,
+      "pred": 47.49592590332031,
+      "truth": -914.0,
+      "err": 961.4959106445312,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 177,
+      "col": 167,
+      "dist_from_center": 62.625873247404705,
+      "pred": 47.33135986328125,
+      "truth": -913.0,
+      "err": 960.3313598632812,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 171,
+      "col": 170,
+      "dist_from_center": 60.108235708594876,
+      "pred": 47.18708801269531,
+      "truth": -911.0,
+      "err": 958.1870727539062,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 198,
+      "col": 70,
+      "dist_from_center": 90.9065454189081,
+      "pred": 50.04019546508789,
+      "truth": -907.0,
+      "err": 957.0402221679688,
+      "organ": "background"
+    },
+    {
+      "row": 172,
+      "col": 170,
+      "dist_from_center": 60.8276253029822,
+      "pred": 47.147789001464844,
+      "truth": -909.0,
+      "err": 956.1477661132812,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 198,
+      "col": 71,
+      "dist_from_center": 90.27181176868004,
+      "pred": 49.7920036315918,
+      "truth": -906.0,
+      "err": 955.7919921875,
+      "organ": "background"
+    },
+    {
+      "row": 197,
+      "col": 71,
+      "dist_from_center": 89.49860334105779,
+      "pred": 49.58578872680664,
+      "truth": -904.0,
+      "err": 953.5858154296875,
+      "organ": "background"
+    },
+    {
+      "row": 175,
+      "col": 169,
+      "dist_from_center": 62.369864518050704,
+      "pred": 47.09626007080078,
+      "truth": -905.0,
+      "err": 952.0962524414062,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 197,
+      "col": 72,
+      "dist_from_center": 88.86506625215557,
+      "pred": 49.57288360595703,
+      "truth": -902.0,
+      "err": 951.5728759765625,
+      "organ": "background"
+    },
+    {
+      "row": 176,
+      "col": 169,
+      "dist_from_center": 63.12685640834652,
+      "pred": 47.39620590209961,
+      "truth": -903.0,
+      "err": 950.3961791992188,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 176,
+      "col": 166,
+      "dist_from_center": 61.220911460055866,
+      "pred": 46.885276794433594,
+      "truth": -903.0,
+      "err": 949.88525390625,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 175,
+      "col": 166,
+      "dist_from_center": 60.440052945046304,
+      "pred": 46.6205940246582,
+      "truth": -902.0,
+      "err": 948.62060546875,
+      "organ": "Duodenum"
+    },
+    {
+      "row": 176,
+      "col": 167,
+      "dist_from_center": 61.84658438426491,
+      "pred": 46.96159362792969,
+      "truth": -899.0,
+      "err": 945.9616088867188,
+      "organ": "Duodenum"
+    }
+  ]
+}

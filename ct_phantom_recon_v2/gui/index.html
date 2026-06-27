@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>v14 CT 重建 Dashboard — Mavis</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=20260627e">
+</head>
+<body>
+  <div class="container">
+
+    <!-- ========== HEADER ========== -->
+    <header class="hdr">
+      <div class="hdr-row">
+        <div class="hdr-titles">
+          <h1>v14 CT 重建 Dashboard</h1>
+          <p class="subtitle">FLARE22_Tr_0009 腹部 CT · v14 fallback (2026-06-27)</p>
+        </div>
+        <div class="hdr-status" id="hdr-status">
+          <span class="status-dot loading"></span>
+          <span class="status-text">加载中…</span>
+        </div>
+      </div>
+      <p class="lead">
+        v14 baseline (SART/SART+TV fit fallback, fit 点 &lt; 8 时固定 a/b) —
+        <strong>跨切片 SART 鲁棒性 std 60 → 7.5</strong>,
+        边界切片 Z=54/64 MAE 改善 -57%/-70%,
+        中央切片 (Z=22/32/43) 完全不退化.
+      </p>
+    </header>
+
+    <!-- ========== Z SLICE SELECTOR ========== -->
+    <section class="selector-section">
+      <div class="card selector-card">
+        <div class="selector-row">
+          <label for="z-select"><span class="selector-label">Z 切片选择器</span></label>
+          <select id="z-select" class="z-select"></select>
+          <span class="selector-hint" id="selector-hint">5 切片 (P1) — 全部 87 切片可查</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== HERO STATS ========== -->
+    <section>
+      <div class="hero-grid" id="hero-stats">
+        <div class="hero-stat">
+          <p class="hero-stat-label">FBP · MAE</p>
+          <p class="hero-stat-value" data-bind="fbp-mae">—</p>
+          <p class="hero-stat-meta" data-bind="fbp-meta">—</p>
+        </div>
+        <div class="hero-stat">
+          <p class="hero-stat-label">SART · MAE</p>
+          <p class="hero-stat-value" data-bind="sart-mae">—</p>
+          <p class="hero-stat-meta" data-bind="sart-meta">—</p>
+        </div>
+        <div class="hero-stat">
+          <p class="hero-stat-label">SART+TV · MAE</p>
+          <p class="hero-stat-value" data-bind="sarttv-mae">—</p>
+          <p class="hero-stat-meta" data-bind="sarttv-meta">—</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 1: v13 → v14 对比 ========== -->
+    <section>
+      <h2><span class="icon">▰</span>v13 → v14 跨切片稳定性对比 (5 切片汇总)</h2>
+      <div class="card">
+        <p class="card-lead">v14 fallback 让 SART/SART+TV 边界切片从"不可用 (MAE 90-230)" 变成"可用 (MAE 41-60)", 跨切片 std 从 60-73 降到 7-8.</p>
+        <div class="chart-wrap"><canvas id="chart-v13-vs-v14"></canvas></div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 2: 5 切片 MAE 详情 ========== -->
+    <section>
+      <h2><span class="icon">▱</span>5 切片 MAE 概览 (v14 + Fallback 标记)</h2>
+      <div class="card">
+        <p class="card-lead">5 切片按 Z 位置排列, 边界切片 (Z=54/64) Fallback 触发 — MAE 显著下降, SART 跨切片 std 从 60 降到 7.5.</p>
+        <div class="chart-wrap"><canvas id="chart-per-slice"></canvas></div>
+        <div class="table-wrap" id="per-slice-table"></div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 2.5: 三通道详细 5 指标对比 ========== -->
+    <section>
+      <h2><span class="icon">▰</span>5 切片 × 3 通道 × 5 指标 完整对比</h2>
+      <p class="card-lead">每张表展示一个重建通道在 5 切片上的全部 5 维质量指标, 便于跨切片横向对比同一通道的稳定性.</p>
+      <div class="card triple-card">
+        <div class="triple-col">
+          <h3 class="triple-title">FBP (滤波反投影)</h3>
+          <p class="triple-meta">无迭代, 无 Fallback, 快速基线</p>
+          <div class="table-wrap" id="detail-fbp-table"></div>
+        </div>
+        <div class="triple-col">
+          <h3 class="triple-title">SART (代数迭代)</h3>
+          <p class="triple-meta">20 迭代, 边界切片 Fallback 触发 (a/b 固定)</p>
+          <div class="table-wrap" id="detail-sart-table"></div>
+        </div>
+        <div class="triple-col">
+          <h3 class="triple-title">SART+TV (全变分正则)</h3>
+          <p class="triple-meta">SART 基础 + TV 平滑, 最佳质量</p>
+          <div class="table-wrap" id="detail-sarttv-table"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 3: 当前选中切片 详情 ========== -->
+    <section>
+      <h2><span class="icon">◐</span>当前 Z=<span id="current-z-label">43</span> 切片详情 (切换 Z 即可更新)</h2>
+      <p class="card-lead" id="single-slice-summary">— 加载中…</p>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="single-slice-table">
+            <thead>
+              <tr><th>通道</th><th>MAE</th><th>PSNR</th><th>SSIM</th><th>CNR</th><th>SNR</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);">加载中…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 4: 器官 overlay (当前选中切片) ========== -->
+    <section>
+      <h2><span class="icon">◉</span>器官 overlay (当前 Z 切片 · 3 通道)</h2>
+      <p class="card-lead">每个通道一张 PNG (truth / pred / error / pred+器官边界). 器官 13 类用 13 色描边, 一眼定位 MAE 高发区.</p>
+      <div class="overlay-grid" id="overlay-grid">
+        <!-- 动态填充 -->
+      </div>
+    </section>
+
+    <!-- ========== SECTION 5: 残差诊断 (中央 Z=43 FBP, v13) ========== -->
+    <section>
+      <h2><span class="icon">◐</span>v13 残差诊断 (中央 Z=43 FBP, 全局诊断)</h2>
+      <p class="card-lead">v13 MAE 38.5 → 临床 30 还差 8.5 HU. 残差 97% 来自 3 个 HU 段 (soft_hi/contrast/fat).</p>
+      <div class="diag-grid">
+        <div class="card">
+          <p class="card-mini-title">per-organ MAE (像素级)</p>
+          <div class="chart-wrap small"><canvas id="chart-organ"></canvas></div>
+        </div>
+        <div class="card">
+          <p class="card-mini-title">per-HU-bucket MAE (按 truth HU 分桶)</p>
+          <div class="chart-wrap small"><canvas id="chart-hu-bucket"></canvas></div>
+        </div>
+        <div class="card">
+          <p class="card-mini-title">per-radial MAE (FOV 中心 → 边缘)</p>
+          <div class="chart-wrap small"><canvas id="chart-radial"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 6: 临床目标 ========== -->
+    <section>
+      <h2><span class="icon">▣</span>临床目标达成 (v14 baseline)</h2>
+      <div class="card">
+        <div class="goal-grid" id="goal-grid"></div>
+      </div>
+    </section>
+
+    <footer class="ftr">
+      <p>v14 baseline · 2026-06-27 · mavis · 数据 <code>output/real_ct/06_eval/</code></p>
+    </footer>
+
+  </div>
+
+  <!-- scripts 必须在 </body> 之前, DOM 全部构建完才执行 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/data_loader.js?v=20260627e"></script>
+    <script src="js/charts.js?v=20260627e"></script>
+    <script src="js/main.js?v=20260627e"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+{
+  "fbp": {
+    "Liver": {
+      "n_voxels": 1768,
+      "pred_HU_mean": 47.07362747192383,
+      "truth_HU_mean": 122.61029052734375,
+      "abs_err_HU": 75.53666305541992
+    },
+    "R_Kidney": {
+      "n_voxels": 1255,
+      "pred_HU_mean": 48.832061767578125,
+      "truth_HU_mean": 126.06055450439453,
+      "abs_err_HU": 77.2284927368164
+    },
+    "Spleen": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Pancreas": {
+      "n_voxels": 2119,
+      "pred_HU_mean": 42.52394104003906,
+      "truth_HU_mean": 58.72770309448242,
+      "abs_err_HU": 16.20376205444336
+    },
+    "Aorta": {
+      "n_voxels": 1198,
+      "pred_HU_mean": 41.897335052490234,
+      "truth_HU_mean": 125.8555908203125,
+      "abs_err_HU": 83.95825576782227
+    },
+    "IVC": {
+      "n_voxels": 551,
+      "pred_HU_mean": 42.80628967285156,
+      "truth_HU_mean": 101.14156341552734,
+      "abs_err_HU": 58.33527374267578
+    },
+    "R_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "L_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Gallbladder": {
+      "n_voxels": 628,
+      "pred_HU_mean": 52.26679992675781,
+      "truth_HU_mean": 23.764331817626953,
+      "abs_err_HU": 28.50246810913086
+    },
+    "Esophagus": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Stomach": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Duodenum": {
+      "n_voxels": 1261,
+      "pred_HU_mean": 44.829952239990234,
+      "truth_HU_mean": 29.20697784423828,
+      "abs_err_HU": 15.622974395751953
+    },
+    "L_Kidney": {
+      "n_voxels": 1239,
+      "pred_HU_mean": 49.62907409667969,
+      "truth_HU_mean": 114.09765625,
+      "abs_err_HU": 64.46858215332031
+    }
+  },
+  "sart": {
+    "Liver": {
+      "n_voxels": 1768,
+      "pred_HU_mean": 42.58279037475586,
+      "truth_HU_mean": 122.61029052734375,
+      "abs_err_HU": 80.02750015258789
+    },
+    "R_Kidney": {
+      "n_voxels": 1255,
+      "pred_HU_mean": 44.05320358276367,
+      "truth_HU_mean": 126.06055450439453,
+      "abs_err_HU": 82.00735092163086
+    },
+    "Spleen": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Pancreas": {
+      "n_voxels": 2119,
+      "pred_HU_mean": 49.504478454589844,
+      "truth_HU_mean": 58.72770309448242,
+      "abs_err_HU": 9.223224639892578
+    },
+    "Aorta": {
+      "n_voxels": 1198,
+      "pred_HU_mean": 47.431983947753906,
+      "truth_HU_mean": 125.8555908203125,
+      "abs_err_HU": 78.4236068725586
+    },
+    "IVC": {
+      "n_voxels": 551,
+      "pred_HU_mean": 49.17734909057617,
+      "truth_HU_mean": 101.14156341552734,
+      "abs_err_HU": 51.96421432495117
+    },
+    "R_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "L_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Gallbladder": {
+      "n_voxels": 628,
+      "pred_HU_mean": 46.506690979003906,
+      "truth_HU_mean": 23.764331817626953,
+      "abs_err_HU": 22.742359161376953
+    },
+    "Esophagus": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Stomach": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Duodenum": {
+      "n_voxels": 1261,
+      "pred_HU_mean": 48.72720718383789,
+      "truth_HU_mean": 29.20697784423828,
+      "abs_err_HU": 19.52022933959961
+    },
+    "L_Kidney": {
+      "n_voxels": 1239,
+      "pred_HU_mean": 43.93836212158203,
+      "truth_HU_mean": 114.09765625,
+      "abs_err_HU": 70.15929412841797
+    }
+  },
+  "sart_tv": {
+    "Liver": {
+      "n_voxels": 1768,
+      "pred_HU_mean": 43.775123596191406,
+      "truth_HU_mean": 122.61029052734375,
+      "abs_err_HU": 78.83516693115234
+    },
+    "R_Kidney": {
+      "n_voxels": 1255,
+      "pred_HU_mean": 43.410892486572266,
+      "truth_HU_mean": 126.06055450439453,
+      "abs_err_HU": 82.64966201782227
+    },
+    "Spleen": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Pancreas": {
+      "n_voxels": 2119,
+      "pred_HU_mean": 49.11859130859375,
+      "truth_HU_mean": 58.72770309448242,
+      "abs_err_HU": 9.609111785888672
+    },
+    "Aorta": {
+      "n_voxels": 1198,
+      "pred_HU_mean": 46.66749954223633,
+      "truth_HU_mean": 125.8555908203125,
+      "abs_err_HU": 79.18809127807617
+    },
+    "IVC": {
+      "n_voxels": 551,
+      "pred_HU_mean": 48.73169708251953,
+      "truth_HU_mean": 101.14156341552734,
+      "abs_err_HU": 52.40986633300781
+    },
+    "R_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "L_Adrenal": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Gallbladder": {
+      "n_voxels": 628,
+      "pred_HU_mean": 45.82235336303711,
+      "truth_HU_mean": 23.764331817626953,
+      "abs_err_HU": 22.058021545410156
+    },
+    "Esophagus": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Stomach": {
+      "n_voxels": 0,
+      "pred_HU_mean": null,
+      "truth_HU_mean": null
+    },
+    "Duodenum": {
+      "n_voxels": 1261,
+      "pred_HU_mean": 48.28660202026367,
+      "truth_HU_mean": 29.20697784423828,
+      "abs_err_HU": 19.07962417602539
+    },
+    "L_Kidney": {
+      "n_voxels": 1239,
+      "pred_HU_mean": 43.107337951660156,
+      "truth_HU_mean": 114.09765625,
+      "abs_err_HU": 70.99031829833984
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "step": "05_postprocess",
+  "scan_mode": false,
+  "active_denoise_params": [
+    3,
+    0.3,
+    -1024,
+    3071
+  ],
+  "denoise_scan": null,
+  "postprocessed": {},
+  "windows": {
+    "lung": {
+      "WW": 1500,
+      "WL": -600
+    },
+    "mediastinum": {
+      "WW": 400,
+      "WL": 40
+    },
+    "bone": {
+      "WW": 1800,
+      "WL": 400
+    },
+    "soft": {
+      "WW": 400,
+      "WL": 50
+    }
+  },
+  "out_dir": "D:\\OpenGATE\\ct_phantom_recon_v2\\output\\real_ct\\05_post"
+}

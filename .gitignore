@@ -1,0 +1,76 @@
+# Python venv (绝对不提交)
+env/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Pytest 缓存
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Node.js
+node_modules/
+package-lock.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ----- 输出大文件排除 -----
+# FLARE22 原始 NIfTI (从官网下载, ~140MB)
+ct_phantom_recon_v2/output/real_ct/01_raw/*.nii
+ct_phantom_recon_v2/output/real_ct/01_raw/*.nii.gz
+
+# 标定后大体积 raw (36MB+, 可重跑生成)
+ct_phantom_recon_v2/output/real_ct/02_calibrated/*.raw
+ct_phantom_recon_v2/output/real_ct/02_calibrated/*.db
+ct_phantom_recon_v2/output/real_ct/02_calibrated/*.mhd
+
+# mu-map 中间 raw (5 个能箱各 36MB, 可重跑生成)
+ct_phantom_recon_v2/output/real_ct/03_proj/mu_map_*.raw
+ct_phantom_recon_v2/output/real_ct/03_proj/mu_map_*.mhd
+
+# 360° × 720 角度投影 raw (720 × ~200KB, 可重跑生成)
+ct_phantom_recon_v2/output/real_ct/03_proj/angle_*/
+ct_phantom_recon_v2/output/real_ct/03_proj/sinogram*
+ct_phantom_recon_v2/output/real_ct/03_proj/projection_log.json
+
+# SART A 矩阵缓存 (~340MB, 可重跑生成)
+ct_phantom_recon_v2/output/real_ct/04_recon/_sart_matrix_cache/
+
+# 重建中间 raw (可重跑生成)
+ct_phantom_recon_v2/output/real_ct/04_recon/sinogram*.raw
+ct_phantom_recon_v2/output/real_ct/04_recon/ct_recon_*.raw
+ct_phantom_recon_v2/output/real_ct/04_recon/_tv_scan/
+ct_phantom_recon_v2/output/real_ct/04_recon/_trash_*/
+ct_phantom_recon_v2/output/real_ct/04_recon/*.mhd
+
+# 后处理 raw (可重跑生成)
+ct_phantom_recon_v2/output/real_ct/05_post/ct_recon_*_hu.raw
+ct_phantom_recon_v2/output/real_ct/05_post/ct_recon_*_hu.mhd
+ct_phantom_recon_v2/output/real_ct/05_post/windows/
+
+# 评估目录回收站 (可恢复,但不入版本控制)
+ct_phantom_recon_v2/output/real_ct/06_eval/_trash_*/
+ct_phantom_recon_v2/output/real_ct/06_eval/_cleanup_changelog*.json
+
+# 临时文件
+*.bak
+*.tmp
+*.log
+*.pyc
+.cache/

@@ -1,0 +1,70 @@
+{
+    "runs": {
+        "value": 1,
+        "unit": null
+    },
+    "events": {
+        "value": 100,
+        "unit": null
+    },
+    "tracks": {
+        "value": 119,
+        "unit": null
+    },
+    "steps": {
+        "value": 417,
+        "unit": null
+    },
+    "init": {
+        "value": 307.351,
+        "unit": "ms"
+    },
+    "duration": {
+        "value": 3.499,
+        "unit": "ms"
+    },
+    "pps": {
+        "value": 28579,
+        "unit": null
+    },
+    "tps": {
+        "value": 34009,
+        "unit": null
+    },
+    "sps": {
+        "value": 119176,
+        "unit": null
+    },
+    "start_time": {
+        "value": "Sat May 16 00:01:13 2026",
+        "unit": null
+    },
+    "stop_time": {
+        "value": "Sat May 16 00:01:13 2026",
+        "unit": null
+    },
+    "sim_start_time": {
+        "value": 0.0,
+        "unit": "ps"
+    },
+    "sim_stop_time": {
+        "value": 1.0,
+        "unit": "s"
+    },
+    "threads": {
+        "value": 1,
+        "unit": null
+    },
+    "arch": {
+        "value": "Windows",
+        "unit": null
+    },
+    "python": {
+        "value": "3.10.20",
+        "unit": null
+    },
+    "track_types": {
+        "value": {},
+        "unit": null
+    }
+}

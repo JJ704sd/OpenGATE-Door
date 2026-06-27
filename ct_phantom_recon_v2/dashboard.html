@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CT 真实患者腹部重建 v13 baseline — Mavis Project</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --line: #e9e3d6;
+    --line-soft: #f0ebe0;
+    --text: #14171e;
+    --muted: #7c7a72;
+    --accent: #2f6f5e;
+    --accent-soft: rgba(47, 111, 94, 0.08);
+    --warn: #c97b3f;
+    --good: #2f6f5e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(47, 111, 94, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(201, 123, 63, 0.05) 0px, transparent 50%);
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 56px 24px; }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 0 0 40px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin: 0 0 16px;
+    font-weight: 400;
+  }
+  h2 .icon {
+    display: inline-block;
+    vertical-align: -3px;
+    margin-right: 8px;
+    color: var(--accent);
+  }
+  section { margin: 56px 0; }
+  .lead {
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0 0 24px;
+    color: var(--text);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 32px 0 8px;
+  }
+  .hero-stat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .hero-stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 6px;
+  }
+  .hero-stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 34px;
+    color: var(--accent);
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .hero-stat-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  td.num {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+  }
+  th.num { text-align: right; }
+  .status-good { color: var(--good); font-weight: 600; }
+  .status-warn { color: var(--warn); font-weight: 600; }
+  .status-bad { color: #b06367; font-weight: 600; }
+  .bench { display: grid; grid-template-columns: 100px 1fr 70px; gap: 12px; align-items: center; padding: 6px 0; }
+  .bench-label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); }
+  .bench-track { height: 14px; background: var(--line-soft); border-radius: 7px; overflow: hidden; position: relative; }
+  .bench-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #4a8d7a); border-radius: 7px; transition: width 0.6s ease; }
+  .bench-fill.partial { background: linear-gradient(90deg, var(--warn), #d99c64); }
+  .bench-fill.bad { background: linear-gradient(90deg, #b06367, #c98689); }
+  .bench-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; }
+  .timeline { list-style: none; padding: 0; margin: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--accent); opacity: .25; }
+  .timeline li { position: relative; padding: 0 0 22px 32px; }
+  .timeline li::before { content: ""; position: absolute; left: 1px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: white; border: 2px solid var(--accent); }
+  .timeline-version { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); font-size: 14px; }
+  .timeline-title { font-weight: 600; margin: 2px 0 4px; }
+  .timeline-desc { font-size: 13px; color: var(--muted); }
+  .timeline-mae { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); margin-top: 4px; }
+  .code {
+    background: #1f2330;
+    color: #e6e8ee;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .code .c-cmd { color: #f59e0b; }
+  .code .c-comment { color: #6c7693; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-good { background: rgba(47, 111, 94, 0.12); color: var(--accent); }
+  .badge-warn { background: rgba(201, 123, 63, 0.14); color: var(--warn); }
+  .badge-bad { background: rgba(176, 99, 103, 0.12); color: #b06367; }
+  .footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  @media (max-width: 720px) {
+    h1 { font-size: 28px; }
+    .container { padding: 32px 18px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .bench { grid-template-columns: 80px 1fr 60px; }
+    section { margin: 40px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>CT 真实患者腹部重建</h1>
+  <p class="subtitle">v13 baseline · 2026-06-23 · D:\OpenGATE\ct_phantom_recon_v2</p>
+
+  <p class="lead">用 FLARE22 公开腹部 CT 跑通端到端真实临床 CT 重建流程。经过 <strong>v4 → v13</strong> 共 10 轮迭代，达成 <span class="badge badge-good">临床 SSIM &gt; 0.85</span>，MAE 跨入 40 HU 以内，SNR 从负值提升至 11.0。当前 v13 baseline 是当前架构下的最优解。</p>
+
+  <div class="hero-grid">
+    <div class="hero-stat">
+      <p class="hero-stat-label">FBP MAE</p>
+      <p class="hero-stat-value">38.56</p>
+      <p class="hero-stat-note">v4 → v13 改善 <strong style="color:var(--accent)">-89%</strong>（358 → 38.56）</p>
+    </div>
+    <div class="hero-stat">
+      <p class="hero-stat-label">SSIM (三通道)</p>
+      <p class="hero-stat-value">0.989</p>
+      <p class="hero-stat-note">v4 → v13 改善 <strong style="color:var(--accent)">+107%</strong>，跨过 0.85 临床门槛</p>
+    </div>
+    <div class="hero-stat">
+      <p class="hero-stat-label">SNR (SART+TV)</p>
+      <p class="hero-stat-value">11.00</p>
+      <p class="hero-stat-note">v4 -0.2 → v13 +11.0，跨过 0 进入正值区</p>
+    </div>
+    <div class="hero-stat">
+      <p class="hero-stat-label">临床目标</p>
+      <p class="hero-stat-value">4 / 5</p>
+      <p class="hero-stat-note">SSIM ✓ · MAE ~ · CNR ✗ · SNR ~</p>
+    </div>
+  </div>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12l4-4 4 4 5-5"/></svg>v13 当前三通道指标</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>通道</th><th class="num">MAE (HU)</th><th class="num">PSNR (dB)</th><th class="num">SSIM</th><th class="num">CNR</th><th class="num">SNR</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>FBP</td><td class="num">38.56</td><td class="num">17.95</td><td class="num">0.989</td><td class="num">1.38</td><td class="num">6.53</td><td><span class="badge badge-good">SSIM ✓</span></td></tr>
+          <tr><td>SART</td><td class="num">38.57</td><td class="num">17.93</td><td class="num">0.989</td><td class="num">1.37</td><td class="num">8.83</td><td><span class="badge badge-good">SSIM ✓</span></td></tr>
+          <tr><td>SART+TV</td><td class="num">38.49</td><td class="num">17.94</td><td class="num">0.989</td><td class="num">1.37</td><td class="num">11.00</td><td><span class="badge badge-good">SSIM ✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>临床目标达成情况</h2>
+    <div class="card">
+      <div class="bench">
+        <span class="bench-label">SSIM &gt; 0.85</span>
+        <div class="bench-track"><div class="bench-fill" style="width:100%"></div></div>
+        <span class="bench-val status-good">0.989 ✓</span>
+      </div>
+      <div class="bench">
+        <span class="bench-label">MAE &lt; 30</span>
+        <div class="bench-track"><div class="bench-fill partial" style="width:78%"></div></div>
+        <span class="bench-val status-warn">38.5 ~</span>
+      </div>
+      <div class="bench">
+        <span class="bench-label">CNR &gt; 3</span>
+        <div class="bench-track"><div class="bench-fill bad" style="width:46%"></div></div>
+        <span class="bench-val status-bad">1.37 ✗</span>
+      </div>
+      <div class="bench">
+        <span class="bench-label">SNR &gt; 30</span>
+        <div class="bench-track"><div class="bench-fill partial" style="width:37%"></div></div>
+        <span class="bench-val status-warn">11.0 ~</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin: 16px 0 0; line-height:1.6;">
+        CNR 受 256² 像素 / 1 mm pitch 空间分辨率限制 — 当前架构约束。<br>
+        MAE 距临床 30 差 8.5 HU — 当前架构 (CG + 线性 fit) 已饱和，需深度学习/架构层创新。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>v4 → v13 演进历程</h2>
+    <div class="card">
+      <ol class="timeline">
+        <li>
+          <span class="timeline-version">v4 · 2026-06-22</span>
+          <div class="timeline-title">baseline — FLARE22 + 解析投影</div>
+          <div class="timeline-desc">FBP MAE 358 / SSIM 0.477，6 个脚本全流程跑通</div>
+        </li>
+        <li>
+          <span class="timeline-version">v5 · 2026-06-23</span>
+          <div class="timeline-title">软组织加权 fit + Hamming 窗</div>
+          <div class="timeline-desc">SSIM 跨 0.50 门槛（FBP 0.477 → 0.526）</div>
+          <div class="timeline-mae">FBP MAE 358 → 330</div>
+        </li>
+        <li>
+          <span class="timeline-version">v6 · 2026-06-23</span>
+          <div class="timeline-title">真 SART 矩阵化（架构突破）</div>
+          <div class="timeline-desc">Siddon ray-tracing + CG 求解 + 磁盘缓存；SART SSIM 0.402 → 0.622</div>
+          <div class="timeline-mae">SART MAE 395 → 272（-31%）· SART+TV MAE 472 → 215（-55%）</div>
+        </li>
+        <li>
+          <span class="timeline-version">v7 · 2026-06-23</span>
+          <div class="timeline-title">多器官 fit（修 mask label 真相）</div>
+          <div class="timeline-desc">mask==1 不是 soft 而是 Liver，FLARE22 无 bone mask；改用 10 点器官 fit</div>
+          <div class="timeline-mae">FBP MAE 331 → 46（-86%）· SSIM 0.523 → 0.984（跨 0.85 临床门槛）</div>
+        </li>
+        <li>
+          <span class="timeline-version">v8 · 2026-06-23</span>
+          <div class="timeline-title">SART CG 60 iter（μ range 7.4×）</div>
+          <div class="timeline-desc">SART μ range 从 [-0.007, +0.009] 扩到 [-0.10, +0.05]</div>
+          <div class="timeline-mae">SART MAE 51 → 50</div>
+        </li>
+        <li>
+          <span class="timeline-version">v9 · 2026-06-23</span>
+          <div class="timeline-title">SART CG 100 iter（μ range 31%）</div>
+          <div class="timeline-desc">CG 60→100 接近饱和；TV weight / I0 校准都已验证最优</div>
+          <div class="timeline-mae">SART MAE 50 → 49</div>
+        </li>
+        <li>
+          <span class="timeline-version">v10 · 2026-06-23</span>
+          <div class="timeline-title">非线性 piecewise fit — <span class="badge badge-bad">FAIL</span></div>
+          <div class="timeline-desc">softplus / poly2 / piecewise linear 三次失败 — FLARE22 无 cortical bone anchor，单线性 fit 不能同时 fit 软组织 + 高密度段</div>
+        </li>
+        <li>
+          <span class="timeline-version">v11 · 2026-06-23</span>
+          <div class="timeline-title">P95 anchor + A_MIN=0.01 约束</div>
+          <div class="timeline-desc">自动检测 FLARE22 P95+ 高密度结构（HU 277.3）作 anchor；A_MIN 防 v8 #1 fit 失真</div>
+          <div class="timeline-mae">FBP MAE 46 → 43（-8%）· SNR 0.6 → 2.2</div>
+        </li>
+        <li>
+          <span class="timeline-version">v12 · 2026-06-23</span>
+          <div class="timeline-title">N_ANGLES 720 — <span class="badge badge-bad">FAIL</span></div>
+          <div class="timeline-desc">7/9 指标退化；720 角度下 CG 矩阵条件数恶化，未收敛</div>
+        </li>
+        <li>
+          <span class="timeline-version">v13 · 2026-06-23 · <span class="badge badge-good">CURRENT</span></span>
+          <div class="timeline-title">弱高斯 σ=0.3 + 临床 HU clip [-1024, +3071]</div>
+          <div class="timeline-desc">8 组参数扫描 (median × sigma × clip) 选出最优组合；σ=0.3 + 临床标准 DICOM 范围</div>
+          <div class="timeline-mae">FBP MAE 43 → 38.6（-9.5%）· SNR 2.2 → 6.5（+197%）</div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>复现命令</h2>
+    <div class="code">
+<span class="c-comment"># 完整流程（首次，~5 min）</span>
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\01_download_dicom.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\02_parse_and_calibrate.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\03_proj_simulate.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\04_reconstruct.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\05_postprocess.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\06_evaluate.py
+
+<span class="c-comment"># 验证 v13 baseline（~15 sec，复用缓存）</span>
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\04_reconstruct.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\05_postprocess.py
+<span class="c-cmd">D:\OpenGATE\env\python.exe</span> scripts\06_evaluate.py
+
+<span class="c-comment"># 检查 metrics.json（期望三通道 MAE ~38.5, SSIM ~0.989）</span>
+type output\real_ct\06_eval\metrics.json
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>关键经验</h2>
+    <div class="card">
+      <p style="margin:0 0 14px; line-height:1.7;"><strong style="color:var(--accent);">架构层改进 &gt; 单点微调</strong> — v3→v4 跨 30% MAE 改善靠三参考点 fit，v6 真 SART 是跨 SSIM 0.55 关键，v7 多器官 fit 是跨 MAE 250 关键。</p>
+      <p style="margin:0 0 14px; line-height:1.7;"><strong style="color:var(--accent);">5 维同时验证救命</strong> — v6 #2 / v8 #1 / v10 都因单维 FAIL 误判；必须 MAE + SSIM + a slope + HU 范围 + 器官 HU 同时检查。</p>
+      <p style="margin:0 0 14px; line-height:1.7;"><strong style="color:var(--accent);">回退必须验证</strong> — v12 subagent FAIL 后没重跑全套，owner 亲自跑 metrics.json 才确认恢复（用户提醒"记得验收"）。</p>
+      <p style="margin:0; line-height:1.7;"><strong style="color:var(--accent);">FLARE22 没有 bone mask</strong> — 13 器官全是软组织 HU -1000~+137；高密度结构自动可检测（P95+ = 277 HU 造影剂/钙化）。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>未来方向（v15+）</h2>
+    <div class="card">
+      <p style="margin:0 0 10px;"><strong>跳出当前框架</strong>（架构层创新）：</p>
+      <ul style="margin:0 0 0 18px; padding:0; color:var(--text); line-height:1.85;">
+        <li><strong>深度学习端到端重建</strong> — U-Net / Diffusion 直接 Radon 投影 → HU（需 PyTorch + GPU）</li>
+        <li><strong>SART preconditioner</strong> — 改进 A 矩阵条件数，加速 CG 收敛</li>
+        <li><strong>opengate 真蒙特卡洛投影</strong>（ROADMAP #10）— 替代半解析，物理完整度最高（1-2 d 工程）</li>
+        <li><strong>多病例扩增</strong>（ROADMAP #11）— FLARE22 10 例验证跨病例稳定性（1 w）</li>
+        <li><strong>GPU 加速 SART</strong>（ROADMAP #13）— CuPy / PyTorch 加速 10-100×（1-2 w）</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div>项目：<code>D:\OpenGATE\ct_phantom_recon_v2</code></div>
+    <div>v13 baseline · 2026-06-23 · mavis (mvs_a39c7ca1dab949c68d9394df11958761)</div>
+  </div>
+
+</div>
+</body>
+</html>

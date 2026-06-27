@@ -1,0 +1,266 @@
+"""
+05_postprocess.py  ——  重建后处理 (HU 校准 + 滤波 + 多窗位)
+==================================================================
+输入:  output/real_ct/04_recon/ct_recon_{fbp,sart,sart_tv}.mhd
+       output/real_ct/02_calibrated/ct_volume_hu.mhd   真值
+       output/real_ct/02_calibrated/mask_volume.mhd    器官 mask
+
+后处理步骤:
+  1. HU 校准: 用 '体外空气 mean = -1000' 做线性校准
+  2. 中值/高斯降噪 (3x3)
+  3. 多窗位截图 (肺窗/纵隔窗/骨窗)
+  4. 写 3 种重建的 HU 校准后版本
+
+输出:
+  output/real_ct/05_post/ct_post_{fbp,sart,sart_tv}.mhd
+  output/real_ct/05_post/windows/  多窗位 PNG
+  output/real_ct/05_post/calibration_log.json
+"""
+
+import os
+import sys
+import json
+import numpy as np
+import SimpleITK as sitk
+from scipy.ndimage import median_filter, gaussian_filter
+import warnings
+warnings.filterwarnings("ignore")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _checkpoints import check_recon_data, CheckpointError
+
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+recon_dir = os.path.join(base_dir, "output", "real_ct", "04_recon")
+calib_dir = os.path.join(base_dir, "output", "real_ct", "02_calibrated")
+out_dir = os.path.join(base_dir, "output", "real_ct", "05_post")
+windows_dir = os.path.join(out_dir, "windows")
+os.makedirs(out_dir, exist_ok=True)
+os.makedirs(windows_dir, exist_ok=True)
+
+TRUTH_CT = os.path.join(calib_dir, "ct_volume_hu.mhd")
+TRUTH_MASK = os.path.join(calib_dir, "mask_volume.mhd")
+
+RECON_FILES = {
+    "fbp": os.path.join(recon_dir, "ct_recon_fbp.mhd"),
+    "sart": os.path.join(recon_dir, "ct_recon_sart.mhd"),
+    "sart_tv": os.path.join(recon_dir, "ct_recon_sart_tv.mhd"),
+}
+
+MU_WATER = 0.0195  # mm^-1, 70 keV 临床参考
+MU_BONE = 0.0284   # mm^-1, cortical bone @ 70 keV 临床参考 (~HU 1000)
+
+# 临床窗位
+WINDOWS = {
+    "lung":      (1500,  -600),  # 肺窗
+    "mediastinum": (400,   40),   # 纵隔窗
+    "bone":      (1800,  400),   # 骨窗
+    "soft":      (400,   50),    # 软组织窗
+}
+
+
+# FLARE22 mask ID → 临床 HU 参考值 (portal-venous phase 典型值)
+# 注意: FLARE22 真实 mask label: 0=air, 1=Liver, 2=R_Kidney, 3=Spleen, ...
+# 软组织器官 HU 范围 -50 ~ 150; air = -1000
+ORGAN_HU_REFERENCE = {
+    1: 121,    # Liver
+    2: 137,    # R_Kidney
+    4: 55,     # Pancreas
+    5: 118,    # Aorta (含造影剂)
+    6: 110,    # IVC
+    9: 34,     # Gallbladder
+    11: 53,    # Stomach
+    12: -13,   # Duodenum
+    13: 114,   # L_Kidney
+}
+# 软组织器官权重 (high-density 边界易受噪声影响, 给 2x 强调软组织中心)
+ORGAN_WEIGHTS = {1: 2.0, 2: 2.0, 4: 2.0, 5: 2.0, 6: 2.0, 9: 2.0, 11: 2.0, 12: 2.0, 13: 2.0}
+MIN_ORGAN_VOXELS = 50
+
+
+def mu_to_hu_with_mask_cal(mu, mask_2d, fov_radius_px=100):
+    """
+    v7 多器官参考点 fit (ROADMAP P2 #7).
+    1. 用 mask=0 (FOV 内) mean μ 当空气参考 → μ_air = 0
+    2. 用 FLARE22 9 个可用器官 (mask 1,2,4,5,6,9,11,12,13) mean μ 当软组织参考
+       每个器官对应一个 HU 真值 (来自 FLARE22 临床典型值)
+    3. 加权最小二乘 fit: mu_actual = a * (mu - mu_air_pred) + b
+       air(1x) + 9 器官 (2x) = 10 点 fit (over-determined, 稳定解)
+    4. 兜底: 器官点 < 2, 退化为 air 单点 → 仅 offset 校准
+    5. HU = (mu_cal - MU_WATER) / MU_WATER * 1000
+    6. 强制 FOV 外 HU = -1000 (空气)
+
+    v6 BUG 修复: v5/v6 用 mask==1 (Liver, 121 HU) 当 soft, mask==2 (R_Kidney, 137 HU) 当 bone.
+    FLARE22 没有 cortical bone mask → bone fit 必然偏差大 → a slope 仅 1.3.
+    """
+    H, W = mu.shape
+    yy, xx = np.indices((H, W))
+    cx, cy = W // 2, H // 2
+    fov_mask = ((xx - cx) ** 2 + (yy - cy) ** 2) < fov_radius_px ** 2
+
+    # air 参考点 (mask=0)
+    air_mask = (mask_2d == 0) & fov_mask
+    if air_mask.sum() > 0:
+        mu_air_pred = float(mu[air_mask].mean())
+    else:
+        mu_air_pred = float(np.percentile(mu, 1))
+
+    mu_offset = mu - mu_air_pred
+
+    # 收集所有 fit 点: (mu_pred, mu_actual, weight)
+    fit_points = []
+    fit_weights = []
+    organ_stats = {}
+
+    # air (权重 1)
+    fit_points.append((0.0, 0.0))
+    fit_weights.append(1.0)
+    organ_stats["air"] = {"mu_pred": mu_air_pred, "mu_offset_pred": 0.0}
+
+    # 各器官参考点 (权重 2)
+    for organ_id, hu_truth in ORGAN_HU_REFERENCE.items():
+        organ_mask = (mask_2d == organ_id) & fov_mask
+        n_voxels = int(organ_mask.sum())
+        if n_voxels >= MIN_ORGAN_VOXELS:
+            mu_pred = float(mu_offset[organ_mask].mean())
+            mu_actual = (hu_truth / 1000.0 + 1.0) * MU_WATER
+            fit_points.append((mu_pred, mu_actual))
+            fit_weights.append(ORGAN_WEIGHTS.get(organ_id, 1.0))
+            organ_stats[organ_id] = {
+                "n_voxels": n_voxels,
+                "mu_pred": float(mu[organ_mask].mean()),
+                "mu_offset_pred": mu_pred,
+                "mu_actual": mu_actual,
+                "hu_truth": hu_truth,
+            }
+
+    # 加权最小二乘 fit (over-determined, 1 linear model, N>=2 points)
+    M = np.array([p[0] for p in fit_points], dtype=np.float64)
+    y = np.array([p[1] for p in fit_points], dtype=np.float64)
+    W = np.sqrt(np.array(fit_weights, dtype=np.float64))
+    A = (np.vstack([M, np.ones_like(M)]).T) * W[:, None]
+    y_w = y * W
+    coef, _, _, _ = np.linalg.lstsq(A, y_w, rcond=None)
+    a = float(coef[0])
+    b = float(coef[1])
+
+    mu_cal = a * mu_offset + b
+    hu = (mu_cal - MU_WATER) / MU_WATER * 1000.0
+    hu = np.where(fov_mask, hu, -1000.0)
+    return hu, (mu_air_pred, a, b, organ_stats)
+
+
+def postprocess_one(name, in_path):
+    print(f"\n--- 后处理 {name} ---")
+    img = sitk.ReadImage(in_path)
+    mu_arr = sitk.GetArrayFromImage(img).astype(np.float32)
+    print(f"  原始 μ: range = [{mu_arr.min():.4f}, {mu_arr.max():.4f}] mm^-1")
+
+    # 读 mask 用来做 HU 校准
+    mask_img = sitk.ReadImage(TRUTH_MASK)
+    mask_arr = sitk.GetArrayFromImage(mask_img)
+    mask_z = mask_arr[43, :, :]
+    H, W = mu_arr.shape
+    if mask_z.shape[0] >= H and mask_z.shape[1] >= W:
+        cy, cx = mask_z.shape[0]//2, mask_z.shape[1]//2
+        mask_2d = mask_z[cy-H//2:cy+H//2, cx-W//2:cx+W//2]
+    else:
+        mask_2d = mask_z
+
+    # 1. μ → HU (mask 校准, v7 多器官 fit)
+    hu_cal, calib = mu_to_hu_with_mask_cal(mu_arr, mask_2d)
+    mu_air_pred, a, b, organ_stats = calib
+    print(f"  μ 校准: air={mu_air_pred:.4f}, a={a:.3f}, b={b:.5f}")
+    n_organs_used = sum(1 for k in organ_stats if k != "air")
+    print(f"  器官参考点: {n_organs_used}/9, total fit points={n_organs_used + 1}")
+    print(f"  HU range: [{hu_cal.min():.1f}, {hu_cal.max():.1f}]")
+
+    # 2. 降噪
+    hu_denoise = median_filter(hu_cal, size=3)
+    hu_denoise = gaussian_filter(hu_denoise, sigma=0.7)
+    print(f"  降噪后: range = [{hu_denoise.min():.1f}, {hu_denoise.max():.1f}]")
+
+    # 3. Clip 到合理 HU 范围
+    hu_denoise = np.clip(hu_denoise, -1100, 3000)
+
+    # 4. 写 mhd
+    out_path = os.path.join(out_dir, f"ct_post_{name}.mhd")
+    img_out = sitk.GetImageFromArray(hu_denoise)
+    img_out.SetSpacing(img.GetSpacing())
+    img_out.SetOrigin(img.GetOrigin())
+    sitk.WriteImage(img_out, out_path)
+    print(f"  写: {out_path}")
+    return hu_denoise, calib
+
+
+def save_windows(arr, name):
+    """保存多窗位截图"""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, len(WINDOWS), figsize=(5 * len(WINDOWS), 5))
+    for ax, (wname, (ww, wl)) in zip(axes, WINDOWS.items()):
+        im = ax.imshow(arr, cmap="gray", vmin=wl - ww/2, vmax=wl + ww/2)
+        ax.set_title(f"{wname}\nWW={ww}, WL={wl}")
+        ax.axis("off")
+        plt.colorbar(im, ax=ax, fraction=0.046)
+    plt.tight_layout()
+    out_png = os.path.join(windows_dir, f"ct_post_{name}_windows.png")
+    plt.savefig(out_png, dpi=80)
+    plt.close(fig)
+    print(f"  窗位截图: {out_png}")
+
+
+def main():
+    print("=" * 60)
+    print("STEP 5: 重建后处理 (HU 校准 + 滤波 + 多窗位)")
+    print("=" * 60)
+
+    results = {}
+    for name, path in RECON_FILES.items():
+        if not os.path.exists(path):
+            print(f"  ⚠ 缺失 {name}: {path}")
+            continue
+        hu_post, calib = postprocess_one(name, path)
+        save_windows(hu_post, name)
+        mu_air_pred, a, b, organ_stats = calib
+        results[name] = {
+            "hu_range": [float(hu_post.min()), float(hu_post.max())],
+            "mu_air_pred": float(mu_air_pred),
+            "a": float(a),
+            "b": float(b),
+            "n_fit_points": len(organ_stats),
+            "organ_stats": {str(k): {kk: (float(vv) if isinstance(vv, (int, float)) else vv)
+                                      for kk, vv in v.items()}
+                            for k, v in organ_stats.items()},
+        }
+
+    # 写 summary
+    summary = {
+        "step": "05_postprocess",
+        "postprocessed": results,
+        "windows": {k: {"WW": v[0], "WL": v[1]} for k, v in WINDOWS.items()},
+        "out_dir": out_dir,
+    }
+    with open(os.path.join(out_dir, "calibration_log.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+
+    # 检查
+    print()
+    print("=" * 60)
+    print("后处理检查")
+    print("=" * 60)
+    for name in results:
+        try:
+            check_recon_data(os.path.join(out_dir, f"ct_post_{name}.mhd"),
+                             truth_mhd=TRUTH_CT, verbose=True)
+        except CheckpointError as e:
+            print(f"  ⚠ {name}: {e}")
+
+    print()
+    print("=" * 60)
+    print("STEP 5 完成 ✓")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

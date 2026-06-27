@@ -1,0 +1,401 @@
+<!-- Slide number: 1 -->
+
+项目报告
+GATE 蒙特卡洛 CT 体膜仿真与重建
+60 角度扇形束扫描  /  自写 FBP 重建  /  v2 干净版本
+
+项目版本
+完成日期
+当前状态
+v2.1
+2026-06-14
+工作流跑通 / 物理量待修正
+
+ct_phantom_recon_v2
+
+### Notes:
+
+<!-- Slide number: 2 -->
+目录
+
+01
+项目概览
+02
+文件结构
+
+03
+仿真设计
+04
+重建算法
+
+05
+数据产物
+06
+数据质量评估与问题
+
+07
+优化路线图
+08
+下一步行动
+
+09
+总结
+
+GATE CT 体膜仿真与重建  ·  v2.1
+2 / 10
+
+### Notes:
+
+<!-- Slide number: 3 -->
+01  项目概览
+
+目标
+关键参数
+
+用 GATE 蒙特卡洛工具包实现扇形束 CT 仿真与重建,验证完整工作流的可行性.
+120 keV 单能 γ,多材质体膜,60 角度 6° 步长.
+自写扇形束 FBP 重建,仅依赖 numpy,scipy,itk.
+扫描角度数
+60,  步长 6°
+
+每角度粒子数
+500,000
+
+全量扫描耗时
+~10 分钟
+
+重建体数据
+12 × 90 × 90
+当前状态
+
+物理列表
+G4EmStandardPhysics_option4
+
+已完成
+60 角度 GATE 扫描, ~10 分钟/全量
+
+进程模式
+60 个独立子进程
+已完成
+扇形束 FBP 重建 12×90×90 体数据
+
+已完成
+可视化输出齐全,工作流可重复执行
+待解决
+几何缺陷,重建 μ 值偏低 3-8 倍
+待解决
+FBP 抗噪弱,中心放射条纹明显
+GATE CT 体膜仿真与重建  ·  v2.1
+3 / 10
+
+### Notes:
+
+<!-- Slide number: 4 -->
+02  文件结构
+
+源码与文档
+output 目录
+
+output/
+ct_phantom_scan.py
+扫描主脚本
+· angle_000/  ...  angle_059/
+
+ct_recon.py
+  - projection.mhd / .raw
+扇形束 FBP 重建
+  - stats.txt
+
+_worker_one_angle.py
+单角度子进程脚本(自动生成)
+· ct_sinogram_3d.mhd / .raw
+
+README.md
+· ct_recon.mhd / .raw
+使用文档
+· ct_sinogram_overview.png
+
+OPTIMIZATION_PLAN.md
+· ct_recon_slices.png
+优化路线图
+
+PROJECT_STATUS.md
+· ct_phantom_3d.png
+现状与经验教训
+
+GATE CT 体膜仿真与重建  ·  v2.1
+4 / 10
+
+### Notes:
+
+<!-- Slide number: 5 -->
+03  仿真设计
+
+体膜组成
+源
+
+主体
+水圆柱 (Tubs)
+R = 80 mm,  L = 80 mm
+类型
+120 keV 单能 γ
+形状
+focused 扇形束
+
+嵌入 1
+空气 (G4_AIR)
+R = 8 mm,  X = +45 mm
+SAD
+400 mm
+
+嵌入 2
+肺 (G4_LUNG_ICRP)
+R = 8 mm,  60° 位置
+ADD
+200 mm
+
+嵌入 3
+皮质骨 (G4_BONE_CORTICAL_ICRP)
+R = 8 mm,  120° 位置
+探测器
+
+嵌入 4
+PMMA (G4_PLEXIGLASS)
+R = 8 mm,  R = 25 mm
+尺寸
+240 × 100 mm
+像素
+30 × 12  (8 mm pitch)
+
+嵌入 5
+铝 (G4_Al)
+R = 8 mm,  R = 25 mm
+采集器
+FluenceActor
+
+物理与角度
+
+物理列表
+G4EmStandardPhysics_option4
+角度数
+60  步长 6°
+进程
+60 个独立子进程
+GATE CT 体膜仿真与重建  ·  v2.1
+5 / 10
+
+### Notes:
+
+<!-- Slide number: 6 -->
+04  重建算法
+
+自写扇形束 FBP,仅依赖 numpy,scipy,itk.从 60 张投影到 12×90×90 三维体数据共 6 步.
+
+步骤 1
+
+步骤 2
+
+步骤 3
+
+步骤 4
+
+步骤 5
+
+步骤 6
+
+读投影
+堆 sinogram
+I0 + log
+Ram-Lak 滤波
+加权反投影
+输出体数据
+60 张 mhd
+(60, 12, 30)
+-log(sino / I0)
+1D FFT × Hamming 窗
+w = (SAD / (Xr + SAD))²
+12 × 90 × 90
+30×12 像素
+三维张量
+中值 3×3
+沿探测器列
+扇形束补偿
+μ 值 (mm⁻¹)
+关键公式
+
+对数反演
+滤波核
+几何权重
+proj = -log(sinogram / I0)
+Ram-Lak × Hamming 窗
+w = (SAD / (Xr + SAD))²
+I0 = sinogram.max()
+保留高频边缘,抑制高频噪声
+扇形束到平行束的等价修正
+GATE CT 体膜仿真与重建  ·  v2.1
+6 / 10
+
+### Notes:
+
+<!-- Slide number: 7 -->
+05  数据产物
+
+输出文件清单
+重建三视图 (轴向 / 冠状 / 矢状)
+
+原始投影
+
+![D:\OpenGATE\ct_phantom_recon_v2\output\ct_recon_slices.png](Image0.jpg)
+angle_000/ ... angle_059/
+60 张, 30×12 像素
+
+Sinogram
+ct_sinogram_3d.mhd / .raw
+堆叠张量 60×12×30
+
+重建体
+ct_recon.mhd / .raw
+12×90×90, μ 值
+
+可视化
+ct_phantom_3d.png
+真值 vs 重建对比
+数据来源: output/ct_recon_slices.png
+
+GATE CT 体膜仿真与重建  ·  v2.1
+7 / 10
+
+### Notes:
+
+<!-- Slide number: 8 -->
+06  数据质量评估与问题
+
+当前数据质量评估
+
+指标
+
+当前值
+
+理论值
+
+偏差
+
+结论
+
+I0 估计
+20 (max)
+70 - 100
+偏低
+异常
+proj_log 范围
+[0.22, 2.30]
+[0.5, 1.5]
+偏宽
+需修正
+
+重建 μ 范围
+[-0.004, 0.005]
+[0, 0.5]
+偏低 3-8 倍
+异常
+水模区域 μ
+~0.002
+0.016
+严重偏低
+异常
+
+Al 球 μ
+不可辨识
+0.40
+不可用
+异常
+已知问题
+
+问题 一
+问题 二
+问题 三
+I0 估计错误
+FBP 抗噪弱
+Z 方向分辨率低
+sinogram.max() 当作 I0,但已被衰减,需独立 air scan
+Ram-Lak 放大高频噪声,60 角度欠采样,中心放射条纹
+12 层 × 8 mm = 96 mm 视野,冠状/矢状面马赛克
+GATE CT 体膜仿真与重建  ·  v2.1
+8 / 10
+
+### Notes:
+
+<!-- Slide number: 9 -->
+07  优化路线图
+
+按性价比排序,数据级修正 → 算法升级 → 扫描配置升级.
+
+阶段 1
+阶段 2
+阶段 3
+数据级修正
+算法升级
+扫描配置升级
+投入
+投入
+投入
+5 - 10 分钟
+30 - 60 分钟
+约 1 小时
+重跑: air scan only
+重跑: 无需重跑扫描
+重跑: 全量重跑 30 min
+
+1.1  修正 I0 估计 (独立 air scan, 5 min)
+2.1  FBP 替换为 SART 迭代重建 (30 min)
+3.1  N_ANGLES 由 60 增至 180 (2° 步长)
+1.2  散射背景减除 (5 min)
+2.2  加 TV 全变差正则化 (30 min)
+3.2  像素 8 mm 改为 4 mm (24 层)
+3.3  配合 SART + TV
+
+收益
+收益
+收益
+μ 绝对值提升 3-5 倍,接近理论水 μ(120 keV) ≈ 0.016
+中心放射条纹消失,结构对比度明显提升
+5 个插入物全部清晰可辨,完成度推向 85%
+推荐路径: 阶段 1.1 + 阶段 2.1,合计 35 分钟,可将完成度从 60% 提升至 85%.
+GATE CT 体膜仿真与重建  ·  v2.1
+9 / 10
+
+### Notes:
+
+<!-- Slide number: 10 -->
+08  下一步行动  /  09  总结
+
+下一步行动
+总结
+
+优先级 高
+修正几何:detector 移至 -X 200mm,1 个 angle 验证主束模式
+已完成
+60 角度 GATE 扫描 + 扇形束 FBP 重建,工作流端到端跑通,可视化齐全.
+
+优先级 高
+60 角度全跑,重建后核对 μ 值是否接近 0.016
+
+优先级 中
+实现 SART 迭代重建替代 FBP,30 分钟
+
+已识别
+三大问题:I0 估计错误,FBP 抗噪弱,Z 方向分辨率低.
+
+优先级 中
+加 TV 正则化,30 分钟
+
+优先级 低
+扫描配置升级至 180 角度 + 4 mm 像素,30 分钟
+
+下一步
+优先修正几何,再以 SART 替换 FBP;35 分钟投入可显著改善物理量.
+
+GATE CT 体膜仿真与重建  ·  v2.1
+10 / 10
+
+### Notes:

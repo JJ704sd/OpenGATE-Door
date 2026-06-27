@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CT 重建 GUI 设计预览 — Mavis Project</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --line: #e9e3d6;
+    --line-soft: #f0ebe0;
+    --text: #14171e;
+    --muted: #7c7a72;
+    --accent: #2f6f5e;
+    --accent-soft: rgba(47, 111, 94, 0.08);
+    --warn: #c97b3f;
+    --good: #2f6f5e;
+    --streamlit: #ff4b4b;
+    --streamlit-soft: #ffeaea;
+    --pyside: #41cd52;
+    --pyside-soft: #e8fbe8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(47, 111, 94, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(201, 123, 63, 0.05) 0px, transparent 50%);
+  }
+  .container { max-width: 1180px; margin: 0 auto; padding: 56px 24px; }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .lead {
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0 0 32px;
+    color: var(--text);
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    margin: 56px 0 16px;
+    font-weight: 400;
+  }
+  h2 .icon {
+    display: inline-block;
+    vertical-align: -3px;
+    margin-right: 8px;
+    color: var(--accent);
+  }
+  h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  section { margin: 48px 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    margin: 16px 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-streamlit { background: var(--streamlit-soft); color: var(--streamlit); }
+  .badge-pyside { background: var(--pyside-soft); color: var(--pyside); }
+  .badge-stage1 { background: rgba(47, 111, 94, 0.1); color: var(--accent); }
+  .badge-stage2 { background: rgba(201, 123, 63, 0.14); color: var(--warn); }
+
+  /* 框架对比 */
+  .frame-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 32px 0;
+  }
+  .frame-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .frame-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .frame-header h3 { margin: 0; }
+  .frame-body {
+    padding: 22px;
+  }
+
+  /* Streamlit 浏览器 mockup */
+  .browser-mock {
+    background: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .browser-bar {
+    background: #e8e8e8;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .browser-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+  .browser-dot.yellow { background: #febc2e; }
+  .browser-dot.green { background: #28c840; }
+  .browser-url {
+    flex: 1;
+    background: white;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+  .streamlit-bg { background: white; padding: 18px; min-height: 380px; }
+  .streamlit-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 4px;
+  }
+  .streamlit-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi-tile {
+    background: #f0f2f6;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e0e2e6;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .kpi-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 2px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .kpi-delta {
+    font-size: 11px;
+    color: var(--good);
+    margin: 0;
+  }
+  .kpi-delta.neg { color: var(--warn); }
+  .st-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 18px 0 10px;
+    color: var(--text);
+  }
+  .progress-row { margin-bottom: 10px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: #f0f2f6;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--streamlit);
+    border-radius: 4px;
+  }
+  .progress-fill.partial { background: var(--warn); }
+  .progress-fill.bad { background: #b06367; }
+  .st-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 12px 0;
+  }
+  .st-table th {
+    text-align: left;
+    padding: 8px;
+    background: #f0f2f6;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  .st-table td { padding: 8px; border-bottom: 1px solid #e8e8e8; }
+  .st-table td.num { text-align: right; font-family: 'JetBrains Mono', monospace; }
+  .st-button {
+    background: var(--streamlit);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  /* PySide6 桌面 mockup */
+  .qt-window {
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #c0c0c0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .qt-titlebar {
+    background: linear-gradient(180deg, #e8e8e8, #d8d8d8);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #b0b0b0;
+  }
+  .qt-titlebar-text {
+    font-size: 12px;
+    color: #14171e;
+    font-weight: 500;
+  }
+  .qt-controls { display: flex; gap: 4px; }
+  .qt-control {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #14171e;
+  }
+  .qt-control.min { background: #d0d0d0; }
+  .qt-control.max { background: #d0d0d0; }
+  .qt-control.close { background: #e06060; color: white; }
+  .qt-menubar {
+    background: #f8f8f8;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #14171e;
+  }
+  .qt-tabs {
+    background: #e8e8e8;
+    padding: 4px 4px 0;
+    display: flex;
+    border-bottom: 1px solid #c0c0c0;
+  }
+  .qt-tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    background: #f0f0f0;
+    border: 1px solid #c0c0c0;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    color: #14171e;
+  }
+  .qt-tab.active {
+    background: white;
+    border-bottom: 1px solid white;
+    font-weight: 600;
+  }
+  .qt-content {
+    background: white;
+    padding: 16px;
+    min-height: 340px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+  }
+  .qt-sidebar {
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px;
+  }
+  .qt-sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .qt-slider {
+    margin-bottom: 10px;
+  }
+  .qt-slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #14171e;
+    margin-bottom: 2px;
+  }
+  .qt-slider-track {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    position: relative;
+  }
+  .qt-slider-fill {
+    position: absolute;
+    height: 100%;
+    background: var(--pyside);
+    border-radius: 3px;
+  }
+  .qt-slider-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 2px solid var(--pyside);
+    border-radius: 50%;
+    top: -3px;
+    transform: translateX(-50%);
+  }
+  .qt-main { display: flex; flex-direction: column; gap: 12px; }
+  .qt-hu-image {
+    background: linear-gradient(135deg, #1a1a1a, #404040, #808080, #c0c0c0, #ffffff);
+    height: 220px;
+    border-radius: 4px;
+    border: 1px solid #d0d0d0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    position: relative;
+  }
+  .qt-statusbar {
+    background: #f0f0f0;
+    border-top: 1px solid #d0d0d0;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* 功能模块 */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .module-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .module-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .module-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .module-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* 时间表 */
+  .timeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .timeline-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .timeline-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .timeline-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  @media (max-width: 880px) {
+    h1 { font-size: 28px; }
+    .frame-compare { grid-template-columns: 1fr; }
+    .module-grid { grid-template-columns: 1fr; }
+    .qt-content { grid-template-columns: 1fr; }
+    .container { padding: 32px 18px; }
+    section { margin: 36px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>CT 重建 GUI 设计预览</h1>
+  <p class="subtitle">D:\OpenGATE\ct_phantom_recon_v2 · 基于 v13 baseline · 2026-06-23</p>
+
+  <p class="lead">基于现有 CLI 流程（6 个 Python 脚本）和 v13 baseline 状态（MAE 38.5 / SSIM 0.989），设计两种 GUI 实现路径：<span class="badge badge-streamlit">阶段 1: Streamlit</span> 快速原型（1 天）+ <span class="badge badge-pyside">阶段 2: PySide6</span> 生产级桌面应用（3 天）。下面展示两种方案的界面 mockup。</p>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>阶段 1: Streamlit 浏览器界面</h2>
+    <p style="color:var(--muted); margin:0 0 16px; font-size:14px;">浏览器打开 <code style="background:var(--bg); padding:2px 6px; border-radius:3px;">localhost:8501</code> · Python 声明式 · Plotly 交互可视化 · 启动命令 <code style="background:var(--bg); padding:2px 6px; border-radius:3px;">streamlit run gui_app.py</code></p>
+
+    <div class="browser-mock">
+      <div class="browser-bar">
+        <span class="browser-dot"></span>
+        <span class="browser-dot yellow"></span>
+        <span class="browser-dot green"></span>
+        <span class="browser-url">🔒 http://localhost:8501 · CT 重建项目</span>
+      </div>
+      <div class="streamlit-bg">
+        <h2 class="streamlit-title">🏥 CT 重建项目 — v13 baseline</h2>
+        <p class="streamlit-subtitle">D:\OpenGATE\ct_phantom_recon_v2 · FLARE22_Tr_0009 · 2026-06-23</p>
+
+        <div class="kpi-row">
+          <div class="kpi-tile">
+            <p class="kpi-label">FBP MAE</p>
+            <p class="kpi-value">38.56</p>
+            <p class="kpi-delta">▼ -89% vs v4 (358)</p>
+          </div>
+          <div class="kpi-tile">
+            <p class="kpi-label">SSIM (三通道)</p>
+            <p class="kpi-value">0.989</p>
+            <p class="kpi-delta">▲ +107% vs v4</p>
+          </div>
+          <div class="kpi-tile">
+            <p class="kpi-label">SNR (SART+TV)</p>
+            <p class="kpi-value">11.00</p>
+            <p class="kpi-delta">▲ -0.2 → 11.0</p>
+          </div>
+          <div class="kpi-tile">
+            <p class="kpi-label">临床目标</p>
+            <p class="kpi-value">4 / 5</p>
+            <p class="kpi-delta">SSIM ✓ · MAE ~ · CNR ✗</p>
+          </div>
+        </div>
+
+        <h3 class="st-section-title">🎯 临床目标达成情况</h3>
+        <div class="progress-row">
+          <div class="progress-label"><span>SSIM &gt; 0.85</span><span style="color:var(--good); font-weight:600;">✓ 0.989</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%;"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>MAE &lt; 30</span><span style="color:var(--warn); font-weight:600;">~ 38.5 (差 8.5)</span></div>
+          <div class="progress-bar"><div class="progress-fill partial" style="width:78%;"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>CNR &gt; 3</span><span style="color:#b06367; font-weight:600;">✗ 1.37 (差 1.63)</span></div>
+          <div class="progress-bar"><div class="progress-fill bad" style="width:46%;"></div></div>
+        </div>
+
+        <h3 class="st-section-title">📊 当前三通道指标</h3>
+        <table class="st-table">
+          <thead><tr><th>通道</th><th>MAE</th><th>PSNR</th><th>SSIM</th><th>CNR</th><th>SNR</th></tr></thead>
+          <tbody>
+            <tr><td>FBP</td><td class="num">38.56</td><td class="num">17.95</td><td class="num">0.989</td><td class="num">1.38</td><td class="num">6.53</td></tr>
+            <tr><td>SART</td><td class="num">38.57</td><td class="num">17.93</td><td class="num">0.989</td><td class="num">1.37</td><td class="num">8.83</td></tr>
+            <tr><td>SART+TV</td><td class="num">38.49</td><td class="num">17.94</td><td class="num">0.989</td><td class="num">1.37</td><td class="num">11.00</td></tr>
+          </tbody>
+        </table>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <span class="st-button">⚙️ 流程控制</span>
+          <span class="st-button">🖼️ 可视化</span>
+          <span class="st-button">🎛️ 参数调节</span>
+          <span class="st-button">📚 版本管理</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 9h6v6H9z"/></svg>阶段 2: PySide6 原生桌面应用</h2>
+    <p style="color:var(--muted); margin:0 0 16px; font-size:14px;">双击 <code style="background:var(--bg); padding:2px 6px; border-radius:3px;">CT-Recon-GUI.exe</code> · Qt 原生窗口 · pyqtgraph GPU 加速 · 离线运行 · 可打包成 .exe</p>
+
+    <div class="qt-window">
+      <div class="qt-titlebar">
+        <span class="qt-titlebar-text">CT 重建项目 — v13 baseline</span>
+        <div class="qt-controls">
+          <span class="qt-control min">─</span>
+          <span class="qt-control max">□</span>
+          <span class="qt-control close">×</span>
+        </div>
+      </div>
+      <div class="qt-menubar">
+        文件 · 编辑 · 视图 · 流程 · 工具 · 帮助
+      </div>
+      <div class="qt-tabs">
+        <div class="qt-tab active">📊 仪表板</div>
+        <div class="qt-tab">⚙️ 流程控制</div>
+        <div class="qt-tab">🖼️ 可视化</div>
+        <div class="qt-tab">🎛️ 参数调节</div>
+        <div class="qt-tab">📚 版本管理</div>
+      </div>
+      <div class="qt-content">
+        <div class="qt-sidebar">
+          <h4 class="qt-sidebar-title">参数</h4>
+          <div class="qt-slider">
+            <div class="qt-slider-label"><span>N_ANGLES</span><span>360</span></div>
+            <div class="qt-slider-track">
+              <div class="qt-slider-fill" style="width:50%;"></div>
+              <div class="qt-slider-handle" style="left:50%;"></div>
+            </div>
+          </div>
+          <div class="qt-slider">
+            <div class="qt-slider-label"><span>CG ITER</span><span>100</span></div>
+            <div class="qt-slider-track">
+              <div class="qt-slider-fill" style="width:33%;"></div>
+              <div class="qt-slider-handle" style="left:33%;"></div>
+            </div>
+          </div>
+          <div class="qt-slider">
+            <div class="qt-slider-label"><span>median</span><span>3</span></div>
+            <div class="qt-slider-track">
+              <div class="qt-slider-fill" style="width:15%;"></div>
+              <div class="qt-slider-handle" style="left:15%;"></div>
+            </div>
+          </div>
+          <div class="qt-slider">
+            <div class="qt-slider-label"><span>gauss σ</span><span>0.3</span></div>
+            <div class="qt-slider-track">
+              <div class="qt-slider-fill" style="width:12%;"></div>
+              <div class="qt-slider-handle" style="left:12%;"></div>
+            </div>
+          </div>
+          <h4 class="qt-sidebar-title" style="margin-top:14px;">版本</h4>
+          <div style="font-size:11px; color:var(--accent); font-weight:600;">● v13 (current)</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:4px;">v11 · v9 · v7 · v6 · v5 · v4</div>
+        </div>
+        <div class="qt-main">
+          <div class="qt-hu-image">
+            SART+TV 重建 HU 图 · WW=400 WL=40 (纵隔窗)
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+            <div style="background:#f8f8f8; padding: 8px; border-radius: 4px; border:1px solid #e0e0e0;">
+              <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">FBP MAE</div>
+              <div style="font-size:18px; font-weight:600; color:var(--text);">38.56</div>
+              <div style="font-size:10px; color:var(--good);">▼ -89% vs v4</div>
+            </div>
+            <div style="background:#f8f8f8; padding: 8px; border-radius: 4px; border:1px solid #e0e0e0;">
+              <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">SSIM</div>
+              <div style="font-size:18px; font-weight:600; color:var(--text);">0.989</div>
+              <div style="font-size:10px; color:var(--good);">▲ +107% vs v4</div>
+            </div>
+            <div style="background:#f8f8f8; padding: 8px; border-radius: 4px; border:1px solid #e0e0e0;">
+              <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">SNR</div>
+              <div style="font-size:18px; font-weight:600; color:var(--text);">11.00</div>
+              <div style="font-size:10px; color:var(--good);">▲ +∞ vs v4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="qt-statusbar">
+        <span>● v13 baseline 已加载 · 256×256 · N_ANGLES=360 · CG=100</span>
+        <span>2026-06-23 22:25 · Ready</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>6 大功能模块</h2>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3 class="module-title">① 状态仪表板</h3>
+        <p class="module-desc">KPI 卡片 · 临床目标进度条 · 三通道表格 · v4→v13 演进时间线</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <h3 class="module-title">② 流程控制</h3>
+        <p class="module-desc">6 个步骤按钮（01-06）· 实时进度 · 日志输出 · 一键全流程</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <h3 class="module-title">③ 可视化</h3>
+        <p class="module-desc">多窗位 HU 图 · 通道切换 · 器官 HU 对比 · 差分热图</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-2.83-2.83l-.06.06a1.65 1.65 0 0 0-1.82.33H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3 class="module-title">④ 参数调节</h3>
+        <p class="module-desc">N_ANGLES / CG_ITER / sigma 滑块 · 应用并重跑 · 实时预览</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3 class="module-title">⑤ 版本管理</h3>
+        <p class="module-desc">v4-v13 历史版本 · 一键回退 · 当前版本高亮 · 自动备份</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3 class="module-title">⑥ 设置</h3>
+        <p class="module-desc">Python 解释器路径 · 主题（浅/深）· 日志级别 · 快捷键</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>实施时间表</h2>
+
+    <div class="card">
+      <h3 style="color:var(--streamlit);">阶段 1: Streamlit 快速原型 · 1 天</h3>
+      <table class="timeline-table">
+        <thead><tr><th>时间</th><th>任务</th><th>产出</th></tr></thead>
+        <tbody>
+          <tr><td>09:00-10:00</td><td>环境配置 + 依赖安装（streamlit, plotly, pandas）</td><td>可启动的空白 GUI</td></tr>
+          <tr><td>10:00-11:00</td><td>模块 [1] 状态仪表板（KPI + 临床目标）</td><td>v13 baseline 实时显示</td></tr>
+          <tr><td>11:00-12:00</td><td>模块 [2] 流程控制（subprocess + 进度条）</td><td>6 步骤按钮 + 日志</td></tr>
+          <tr><td>13:00-14:30</td><td>模块 [3] 可视化（HU 图 + 多窗位 + 器官 HU）</td><td>Plotly 交互图</td></tr>
+          <tr><td>14:30-15:30</td><td>模块 [4] 参数调节（滑块 + 应用重跑）</td><td>实时调参</td></tr>
+          <tr><td>15:30-16:30</td><td>模块 [5] 版本管理（v4-v13 回退）</td><td>一键回退</td></tr>
+          <tr><td>16:30-17:00</td><td>测试 + 文档</td><td>README + 验收清单</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3 style="color:var(--pyside);">阶段 2: PySide6 生产级桌面应用 · 3 天</h3>
+      <table class="timeline-table">
+        <thead><tr><th>时间</th><th>任务</th><th>产出</th></tr></thead>
+        <tbody>
+          <tr><td>Day 1 上午</td><td>QMainWindow 骨架 + Tab 框架 + 状态仪表板</td><td>可启动窗口</td></tr>
+          <tr><td>Day 1 下午</td><td>流程控制 + QThread 后台 Worker</td><td>不卡顿的步骤运行</td></tr>
+          <tr><td>Day 2 上午</td><td>pyqtgraph HU 图 + 多窗位切换 + 缩放交互</td><td>GPU 加速可视化</td></tr>
+          <tr><td>Day 2 下午</td><td>器官 HU 对比柱状图 + 参数滑块控件</td><td>完整数据探索</td></tr>
+          <tr><td>Day 3 上午</td><td>版本管理 Tab + 自动备份机制</td><td>一键回退 + 安全保障</td></tr>
+          <tr><td>Day 3 下午</td><td>错误处理 + PyInstaller 打包 .exe</td><td>CT-Recon-GUI.exe (~200 MB)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>下一步</h2>
+    <div class="card">
+      <p style="margin: 0 0 16px;">完整实现细节见 <strong>GUI_DESIGN.md</strong>（含完整代码示例、模块设计、安全策略、测试策略、打包分发）。</p>
+      <p style="margin: 0; color: var(--muted);">需要启动哪个阶段，告诉我：</p>
+      <ul style="margin: 12px 0 0 0; padding-left: 20px; color: var(--text); line-height: 1.85;">
+        <li><strong>启动阶段 1</strong>（Streamlit, 1 天）— 我立即开始写代码</li>
+        <li><strong>启动阶段 2</strong>（PySide6, 3 天）— 跳过阶段 1，直接做桌面应用</li>
+        <li><strong>先做更详细设计</strong>（某个模块细化 / UX 流程图 / 数据流图）</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div>设计文档: <code>GUI_DESIGN.md</code> · 预览: <code>gui_preview.html</code></div>
+    <div>v13 baseline · 2026-06-23 · mavis (mvs_a39c7ca1dab949c68d9394df11958761)</div>
+  </div>
+
+</div>
+</body>
+</html>
