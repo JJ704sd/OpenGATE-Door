@@ -800,13 +800,86 @@ per-slice SART:
 - **临床使用**: v14 baseline (含 fallback), 三通道全切片可用
 - **未来方向**: v15 端到端深度学习 (用户已声明等数据扩增指令)
 - **可立即做**: v15 预研 (PyTorch 环境准备 + 架构选型, 不依赖数据)
-- **不可动** (用户已说等指令/暂停): 多病例扩增, opengate 真 MC, GPU 加速, GUI 实施
+- **不可动** (用户已说等指令/暂停): 多病例扩增, opengate 真 MC, GPU 加速
+- **已解禁 (2026-06-27)**: Web GUI 实施 — gui/ dashboard + Z 选择器 + 器官 overlay + Lightbox (§17)
 
 ---
 
-*日期: 2026-06-27 13:30*
-*v14 fallback: PARTIAL PASS, 锁定*
-*下一步: 等用户决定走 v15 深度学习方向*
+## 17. v14 维护 (2026-06-27) — Web Dashboard + Git + Lightbox
+
+### 触发
+
+v14 fallback PASS 后用户启动 GUI 实施 (A+B):
+- **A**: Z 切片选择器 (87 选项, P1 5 切片有数据)
+- **B**: 器官 overlay PNG (15 张, 5 切片 × 3 通道)
+
+### 实施
+
+#### A. Web Dashboard (gui/)
+- **7 区块**: Hero stats / §1 v13vs14 / §2 MAE 概览 / **§2.5 三通道详细 5 指标** / §3 单切片 / §4 overlay / §5 残差诊断 / §6 临床目标
+- **Z 切片选择器**: 87 选项 (5 P1 + 82 其他), optgroup 分组, 切 Z 实时 fetch metrics_z<Z>.json
+- **技术栈**: 静态 HTML + Chart.js 4.4 (CDN) + 5 图 (v13vs14 / per-slice / per-organ / per-HU-bucket / per-radial)
+- **数据源**: `output/real_ct/06_eval/*.json` 实时读 (fetch cache: no-store)
+- **HTTP server**: `python -m http.server 8765 --bind 127.0.0.1` (PID 48844 跑中)
+
+#### B. 器官 overlay (scripts/generate_overlays.py)
+- **15 张 PNG**: 5 切片 (Z=22/32/43/54/64) × 3 通道 (FBP/SART/SART+TV)
+- **每张 4 子图**: truth / pred / error / pred+13 类器官边界 overlay
+- **器官 13 类**: 用 13 色描边, 一眼定位 MAE 高发区 (验证残差诊断)
+
+#### C. Lightbox (gui/js/main.js)
+- **触发**: 点击 §4 任意 overlay PNG
+- **交互**:
+  - 滚轮缩放 (0.2x - 8x, 步进 0.25x, 鼠标位置为中心)
+  - 拖拽平移 (1x 时锁定, 放大后可拖)
+  - 双击图片复位
+  - 工具栏: +/-/复位/✕
+  - 快捷键: `+`/`-`/`0` 缩放, `ESC` 关闭
+- **背景**: rgba(20,23,30,0.92) + backdrop-filter blur(4px)
+- **动画**: fade-in 0.18s, transform 0.05s linear (丝滑)
+
+#### D. Bug Fixes
+- **DOM 时序 bug**: scripts 从 `<head>` 移到 `</body>` 之前 (statusEl null 抛 TypeError)
+- **listener 注册顺序**: 必须在 populateZSelector 之后立即注册, 不能等 loadSlice await
+- **chart.js barh**: Chart.js 4 不再支持 `type: "barh"`, 改 `type: "bar"` + `indexAxis: "y"`
+- **setStatus 作用域**: IIFE 内 const, loadSlice 在 IIFE 外, 提取到模块级函数
+- **fetchJSON 5s timeout + AbortController**: 防止 fetch 静默挂起
+- **cache-bust `?v=20260627f`**: 浏览器硬刷拿新代码
+
+#### E. Git 仓库初始化
+- **背景**: 项目长期无 git (~750 MB 原始数据靠 backup 脚本追溯), 风险大
+- **`.gitignore` 76 行**: 排除 `01_raw/*.nii` (130 MB), `02_calibrated/*.raw` (45 MB), `03_proj/*.raw` (181 MB), `_sart_matrix_cache/` (342 MB), 参数扫描 (`*_m*_s*_c-*`), `ppt_workspace/node_modules`, `.pytest_cache`, `.playwright-mcp` 等
+- **保留**: 全部 .mhd (文本头), .json (结果), .png (产品图), 12 个 backup 脚本
+- **Root commit (9a3c05c)**: "v14 baseline: CT 重建 fallback + web dashboard + lightbox", 271 files, 33105 insertions
+- **GitHub push**: 待 (GH007 私密邮箱 + 国内代理风险, 走 mavis git push 可能挂, 建议用户本地走 SSH push)
+
+### 验证
+
+| 维度 | 状态 |
+|---|---|
+| Dashboard 7 区块渲染 | ✅ Playwright 实测 0 errors |
+| Z=22 切换 + 表格加载 | ✅ console `[data_loader] metrics_z022.json OK (5ms)` |
+| §2.5 三表 5 切片 × 5 维 | ✅ 5 行 × 6 列, 边界切片高亮 |
+| Lightbox 缩放/拖拽/关闭 | ✅ 100% → 175% → 复位 100% → 关闭 |
+| pytest 21/21 | ✅ 2.71s 全 PASS (无回归) |
+
+### 下一轮候选
+
+| # | 任务 | 耗时 | 优先级 |
+|---|---|---|---|
+| 1 | 跑全 87 切片 (multi_slice_runner 循环 + generate_overlays) | 1-2 h | P1 |
+| 2 | §3 localStorage 缓存 (切 Z 零延迟) | 2 h | P2 |
+| 3 | §5 残差诊断扩展 (任意 Z 看残差) | 4 h | P2 |
+| 4 | 对比模式 (选 2 Z 并排) | 1 d | P3 |
+| 5 | 导出 PDF/PNG 报告 (给临床医生) | 1 d | P3 |
+| 6 | GitHub remote + push (SSH 通道) | 1 h | P1 |
+| 7 | v15 深度学习预研 (PyTorch 环境) | 1 d | P3 |
+
+---
+
+*日期: 2026-06-27 15:30*
+*v14 baseline 完整 (fallback + dashboard + git)*
+*下一步: 等用户选下一轮任务 (当前推荐 #1 跑全 87 切片)*
 
 ---
 

@@ -29,7 +29,7 @@ TRUTH = os.path.join(D, "02_calibrated", "ct_volume_hu.mhd")
 MASK = os.path.join(D, "02_calibrated", "mask_volume.mhd")
 TRUTH_Z = 43
 FOV_R = 100
-Z_INDICES = [22, 32, 43, 54, 64]
+Z_INDICES = list(range(0, 87))  # 全 87 切片 (FLARE22_Tr_0009 = 87 Z)
 METHODS = ["fbp", "sart", "sart_tv"]
 OUT_DIR = os.path.join(D, "06_eval", "overlays")
 os.makedirs(OUT_DIR, exist_ok=True)

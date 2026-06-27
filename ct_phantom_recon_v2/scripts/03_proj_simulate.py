@@ -203,9 +203,10 @@ def run_projection_set(mu_maps):
     print(f"  Z 切片索引 = {Z_SLICE_IDX} (中央)")
     print()
 
+    # P1 多切片: angle 目录加 z<Z> 前缀, 避免不同 Z 共用 angle_000/projection.mhd
     angle_dirs = []
     for a in range(N_ANGLES):
-        angle_dirs.append(os.path.join(out_root, f"angle_{a:03d}"))
+        angle_dirs.append(os.path.join(out_root, f"angle_z{Z_SLICE_IDX:03d}_{a:03d}"))
 
     # 写每角度
     t_start = time.time()

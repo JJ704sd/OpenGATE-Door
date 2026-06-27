@@ -122,9 +122,9 @@ def load_sinogram():
     sino = np.zeros((N_ANGLES, N_DET), dtype=np.float32)
     missing = 0
     for a in range(N_ANGLES):
-        proj_mhd = os.path.join(proj_dir, f"angle_{a:03d}", "projection.mhd")
+        proj_mhd = os.path.join(proj_dir, f"angle_z{Z_IDX:03d}_{a:03d}", "projection.mhd")
         if not os.path.exists(proj_mhd):
-            print(f"  ⚠ 缺失 angle_{a:03d}")
+            print(f"  ⚠ 缺失 angle_z{Z_IDX:03d}_{a:03d}")
             missing += 1
             continue
         img = sitk.ReadImage(proj_mhd)

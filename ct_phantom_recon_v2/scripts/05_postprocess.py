@@ -3,7 +3,7 @@
 ==================================================================
 输入:  output/real_ct/04_recon/ct_recon_{fbp,sart,sart_tv}.mhd
        output/real_ct/02_calibrated/ct_volume_hu.mhd   真值
-       output/real_ct/02_calibrated/mask_volume.mhd    器官 mask 
+       output/real_ct/02_calibrated/mask_volume.mhd    器官 mask
 
 后处理步骤:
   1. HU 校准: 用 '体外空气 mean = -1000' 做线性校准
@@ -50,10 +50,13 @@ os.makedirs(windows_dir, exist_ok=True)
 TRUTH_CT = os.path.join(calib_dir, "ct_volume_hu.mhd")
 TRUTH_MASK = os.path.join(calib_dir, "mask_volume.mhd")
 
+# P1 多切片: 用环境变量 Z_IDX 决定读 04 哪个 z 切片的输出
+ANCHOR_TRUTH_Z = int(os.environ.get("Z_IDX", 43))  # truth volume 的 Z 切片 (P1 多切片: 跑哪个就设哪个)
+
 RECON_FILES = {
-    "fbp": os.path.join(recon_dir, "ct_recon_fbp.mhd"),
-    "sart": os.path.join(recon_dir, "ct_recon_sart.mhd"),
-    "sart_tv": os.path.join(recon_dir, "ct_recon_sart_tv.mhd"),
+    "fbp": os.path.join(recon_dir, f"ct_recon_fbp_z{ANCHOR_TRUTH_Z:03d}.mhd"),
+    "sart": os.path.join(recon_dir, f"ct_recon_sart_z{ANCHOR_TRUTH_Z:03d}.mhd"),
+    "sart_tv": os.path.join(recon_dir, f"ct_recon_sart_tv_z{ANCHOR_TRUTH_Z:03d}.mhd"),
 }
 
 MU_WATER = 0.0195  # mm^-1, 70 keV 临床参考
@@ -92,7 +95,7 @@ ANCHOR_PERCENTILE = 95          # 取 HU 直方图 P95+ 像素作为高密度段
 ANCHOR_MIN_HU = 100             # 高密度 anchor 的最低 HU (FLARE22 是造影剂/钙化, 不是 cortical bone)
 ANCHOR_MIN_VOXELS = 30          # 高密度像素数阈值 (避免噪声 anchor)
 ANCHOR_WEIGHT = 2.0             # anchor 在 fit 中的权重 (与软组织器官一致)
-ANCHOR_TRUTH_Z = int(os.environ.get("Z_IDX", 43))  # truth volume 用 Z 切片 (P1 多切片: 设环境变量)
+# ANCHOR_TRUTH_Z 已在 line 55 定义 (RECON_FILES 之前)
 
 # v14 fallback 配置 (边界切片 fit 点 < 阈值时, 用固定 a/b 跳过 lstsq)
 A_FALLBACK = 0.04               # 接近 FBP 通道 a=0.033, 微调以匹配 SART μ 范围
