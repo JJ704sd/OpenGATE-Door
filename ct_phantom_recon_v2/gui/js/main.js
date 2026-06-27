@@ -7,7 +7,8 @@
 
 let STATIC_DATA = null;
 let CURRENT_Z = 43;
-const MULTISLICE_ZS = [22, 32, 43, 54, 64];
+// 全 87 切片都有完整数据 (87/87 跑通, 2026-06-27)
+const MULTISLICE_ZS = Array.from({ length: 87 }, (_, i) => i);
 
 // 模块级 status helper — loadSlice 在 IIFE 外, 需共享 setStatus
 function setStatus(text, kind) {
@@ -57,28 +58,37 @@ function populateZSelector() {
   // P1 已跑 5 个 + FLARE22 总 87 切片 (0-86)
   const ms = STATIC_DATA.multislice;
   sel.innerHTML = "";
-  // 5 个 P1 切片先列出 (group)
-  const group1 = document.createElement("optgroup");
-  group1.label = "P1 已跑 (5 切片)";
+  // 全 87 切片分 3 组: 中央 (40-46) / 上下半区 / 上下边界 (Z=0-19 + Z=67-86)
+  const isCenter = (z) => z >= 40 && z <= 46;
+  const isBoundary = (z) => z < 20 || z > 66;
+  const tagCenter = (z) => z === 43 ? " ★ 中央 baseline" : " (中央区)";
+  const tagBoundary = (z) => (z < 20 ? " (上边界)" : " (下边界)");
+
+  const groupCenter = document.createElement("optgroup");
+  groupCenter.label = "中央 Z=40-46 (含 baseline)";
+  const groupMid = document.createElement("optgroup");
+  groupMid.label = "中央过渡 Z=20-39 / 47-66";
+  const groupBoundary = document.createElement("optgroup");
+  groupBoundary.label = "边界 Z=0-19 / Z=67-86 (Fallback 触发风险)";
+
   for (const z of MULTISLICE_ZS) {
     const opt = document.createElement("option");
     opt.value = z;
-    opt.textContent = `Z=${z}${z === 43 ? " (中央 baseline)" : ""}`;
     if (z === CURRENT_Z) opt.selected = true;
-    group1.appendChild(opt);
+    if (isCenter(z)) {
+      opt.textContent = `Z=${z}${tagCenter(z)}`;
+      groupCenter.appendChild(opt);
+    } else if (isBoundary(z)) {
+      opt.textContent = `Z=${z}${tagBoundary(z)}`;
+      groupBoundary.appendChild(opt);
+    } else {
+      opt.textContent = `Z=${z}`;
+      groupMid.appendChild(opt);
+    }
   }
-  sel.appendChild(group1);
-  // 其他 82 切片
-  const group2 = document.createElement("optgroup");
-  group2.label = "其他 82 切片 (仅 baseline 数据, 无 overlay)";
-  for (let z = 0; z <= 86; z++) {
-    if (MULTISLICE_ZS.includes(z)) continue;
-    const opt = document.createElement("option");
-    opt.value = z;
-    opt.textContent = `Z=${z}`;
-    group2.appendChild(opt);
-  }
-  sel.appendChild(group2);
+  sel.appendChild(groupCenter);
+  sel.appendChild(groupMid);
+  sel.appendChild(groupBoundary);
 }
 
 // ========== 单切片加载 + 渲染 ==========
@@ -127,8 +137,9 @@ async function loadSlice(z) {
     `;
     tbody.appendChild(tr);
   }
-  // Summary
-  const fallback = fallbackLikely(z) ? "✓ 触发 (fit < 8 → 固定 a/b)" : "— 未触发 (fit ≥ 8)";
+  // Summary (P1: Z=54/64 确认触发; 边界 Z 标"高风险"待验; 中央 Z 标"未触发")
+  const fbl = fallbackLikely(z);
+  const fallback = fbl === true ? "✓ 触发 (fit < 8 → 固定 a/b)" : (fbl === null ? "? 边界 (高风险)" : "— 未触发 (fit ≥ 8)");
   const m = metrics["sart_tv"];
   document.getElementById("single-slice-summary").textContent =
     `Z=${z} · SART+TV MAE=${m.MAE_HU.toFixed(1)} HU · SSIM=${m.SSIM.toFixed(3)} · Fallback: ${fallback}`;
@@ -147,7 +158,7 @@ function renderOverlayGrid(z, hasOverlay) {
     if (hasOverlay) {
       card.innerHTML = `
         <div class="overlay-img-wrap">
-          <img class="overlay-img" src="${DATA_PATHS.overlay(z, m)}" alt="Z=${z} ${m} overlay" loading="lazy">
+          <img class="overlay-img zoomable" src="${DATA_PATHS.overlay(z, m)}" data-zoom-title="Z=${z} · ${m.toUpperCase()} 器官 overlay" alt="Z=${z} ${m} overlay" loading="lazy" title="点击放大">
         </div>
         <div class="overlay-meta">
           <span class="overlay-channel">${m.toUpperCase()}</span>
@@ -283,3 +294,137 @@ function renderGoals(ml) {
   }
   goalGrid.innerHTML = html;
 }
+
+// ========== Lightbox (点击图片放大缩小) ==========
+const Lightbox = (() => {
+  const box = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  const label = document.getElementById("lightbox-zoom-label");
+  const caption = document.getElementById("lightbox-caption");
+  const btnIn = document.getElementById("lightbox-zoom-in");
+  const btnOut = document.getElementById("lightbox-zoom-out");
+  const btnReset = document.getElementById("lightbox-reset");
+  const btnClose = document.getElementById("lightbox-close");
+
+  const MIN_SCALE = 0.2;
+  const MAX_SCALE = 8;
+  const STEP = 0.25;
+
+  let scale = 1;
+  let tx = 0;
+  let ty = 0;
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+  let startTx = 0;
+  let startTy = 0;
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function apply() {
+    img.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    label.textContent = `${Math.round(scale * 100)}%`;
+  }
+  function reset() {
+    scale = 1;
+    tx = 0;
+    ty = 0;
+    apply();
+  }
+  function zoom(delta, cx, cy) {
+    const old = scale;
+    scale = clamp(scale + delta, MIN_SCALE, MAX_SCALE);
+    if (scale === old) return;
+    // 鼠标位置为缩放中心
+    if (cx !== undefined && cy !== undefined) {
+      const rect = img.getBoundingClientRect();
+      const offsetX = cx - (rect.left + rect.width / 2);
+      const offsetY = cy - (rect.top + rect.height / 2);
+      const ratio = scale / old;
+      tx = offsetX - (offsetX - tx) * ratio;
+      ty = offsetY - (offsetY - ty) * ratio;
+    }
+    apply();
+  }
+  function open(src, title) {
+    img.src = src;
+    caption.textContent = title || src.split("/").pop();
+    reset();
+    box.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+    console.log(`[lightbox] open: ${title || src}`);
+  }
+  function close() {
+    box.classList.remove("is-open");
+    document.body.style.overflow = "";
+    img.src = "";
+    console.log("[lightbox] close");
+  }
+
+  // 滚轮缩放
+  box.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? STEP : -STEP;
+    zoom(delta, e.clientX, e.clientY);
+  }, { passive: false });
+
+  // 拖拽
+  img.addEventListener("mousedown", (e) => {
+    if (scale <= 1 && tx === 0 && ty === 0) return; // 1x 时不拖
+    dragging = true;
+    img.classList.add("is-dragging");
+    startX = e.clientX;
+    startY = e.clientY;
+    startTx = tx;
+    startTy = ty;
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    tx = startTx + (e.clientX - startX);
+    ty = startTy + (e.clientY - startY);
+    apply();
+  });
+  document.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    img.classList.remove("is-dragging");
+  });
+
+  // 双击复位
+  img.addEventListener("dblclick", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    reset();
+  });
+
+  // 点击背景关闭 (但点击图片不关)
+  box.addEventListener("click", (e) => {
+    if (e.target === box) close();
+  });
+
+  // 工具栏
+  btnIn.addEventListener("click", (e) => { e.stopPropagation(); zoom(STEP); });
+  btnOut.addEventListener("click", (e) => { e.stopPropagation(); zoom(-STEP); });
+  btnReset.addEventListener("click", (e) => { e.stopPropagation(); reset(); });
+  btnClose.addEventListener("click", (e) => { e.stopPropagation(); close(); });
+
+  // ESC 关闭 / +/- 缩放
+  document.addEventListener("keydown", (e) => {
+    if (!box.classList.contains("is-open")) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "+" || e.key === "=") zoom(STEP);
+    else if (e.key === "-" || e.key === "_") zoom(-STEP);
+    else if (e.key === "0") reset();
+  });
+
+  return { open, close };
+})();
+
+// 全局 click 委托: 任何 .zoomable 图片被点 → lightbox
+document.addEventListener("click", (e) => {
+  const target = e.target.closest(".zoomable");
+  if (!target) return;
+  e.preventDefault();
+  const title = target.getAttribute("data-zoom-title") || target.alt || target.src.split("/").pop();
+  Lightbox.open(target.src, title);
+});

@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>v14 CT 重建 Dashboard — Mavis</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=20260627e">
+  <link rel="stylesheet" href="css/styles.css?v=20260627g">
 </head>
 <body>
   <div class="container">
@@ -168,10 +168,24 @@
 
   </div>
 
+  <!-- ========== LIGHTBOX (点击 §4 overlay 放大缩小) ========== -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片放大查看">
+    <div class="lightbox-toolbar">
+      <button class="lightbox-btn" id="lightbox-zoom-out" title="缩小 (-)">−</button>
+      <span class="lightbox-zoom-label" id="lightbox-zoom-label">100%</span>
+      <button class="lightbox-btn" id="lightbox-zoom-in" title="放大 (+)">+</button>
+      <button class="lightbox-btn" id="lightbox-reset" title="复位 (双击图片)">↺ 复位</button>
+      <button class="lightbox-btn" id="lightbox-close" title="关闭 (ESC)">✕</button>
+    </div>
+    <img class="lightbox-img" id="lightbox-img" alt="放大图片" draggable="false">
+    <div class="lightbox-hint">滚轮缩放 · 拖拽平移 · 双击复位 · ESC 关闭</div>
+    <div class="lightbox-caption" id="lightbox-caption">—</div>
+  </div>
+
   <!-- scripts 必须在 </body> 之前, DOM 全部构建完才执行 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="js/data_loader.js?v=20260627e"></script>
-    <script src="js/charts.js?v=20260627e"></script>
-    <script src="js/main.js?v=20260627e"></script>
+<script src="js/data_loader.js?v=20260627g"></script>
+    <script src="js/charts.js?v=20260627g"></script>
+    <script src="js/main.js?v=20260627g"></script>
 </body>
 </html>

@@ -63,7 +63,10 @@ async function loadSliceData(z) {
 }
 
 // Fallback 状态推断 (基于 P1 5 切片经验: fit < 8 触发)
-// 87 切片中, Z=54/64 已知触发, 其他切片默认未触发 (除非用户重跑分析)
+// 87 切片中, 已知触发: Z=54/64 (P1 验证). 边界 Z<20 / Z>66 触发风险高 (留作精确判断, UI 仍标 "—")
+// 准确状态: 看 06_evaluate 输出的 fit_points 数, 当前简化处理: 边界 Z 标"高风险"
 function fallbackLikely(z) {
-  return z === 54 || z === 64;
+  if (z === 54 || z === 64) return true;  // P1 验证 PASS
+  if (z < 20 || z > 66) return null;  // 边界, 不确定
+  return false;  // 中央 20-66 默认未触发
 }
