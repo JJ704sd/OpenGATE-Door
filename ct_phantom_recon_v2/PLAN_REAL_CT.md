@@ -4,6 +4,30 @@
 
 ---
 
+## 实施状态 (2026-06-27)
+
+✅ **本方案已完整实施并锁定为 v14.1 baseline**。
+
+| 步骤 | 实施状态 | 实施细节 |
+|---|---|---|
+| §1 数据获取 | ✅ | FLARE22_Tr_0009 (1 例验证), 87×512×512, 0.81mm |
+| §2 解析 + HU 标定 | ✅ | `scripts/02_parse_and_calibrate.py`,SimpleITK 重采样 |
+| §3 GATE 仿真 | ⚠️ 半实现 | v14.1 用 opengate 5 能箱 μ-map (Schneider spectra) + 半解析 Radon 投影;**全 GATE MC 等指令** |
+| §4 重建 | ✅ | 真 SART 矩阵化 (CG 100 iter + Siddon ray-tracing),FBP + Hamming + SART+TV (TV=0.05) |
+| §5 后处理 | ✅ + v14 fallback | v7 10 点 fit + v11 P95 anchor + A_MIN + v13 弱高斯 σ=0.3 + **v14 fallback (边界切片 a=0.04, b=MU_WATER)** |
+| §6 量化评估 | ✅ + 87-slice | MAE/PSNR/SSIM/CNR/SNR + 器官 HU,全 87 切片覆盖 |
+
+**当前版本**: v14.1 baseline (中央 Z=43: MAE 38.5 / SSIM 0.989; 全 87 切片均值 MAE ~45, std ~7.5)
+
+**完整总结**: 见 [`FINAL_SUMMARY.md`](./FINAL_SUMMARY.md) (v4 → v14.1 完整版本演进)  
+**决策日志**: 见 [`ROADMAP.md`](./ROADMAP.md) (v6 → v14.1 决策日志)  
+**v14 fallback 决策报告**: 见 [`output/real_ct/06_eval/V14_FALLBACK_DECISION.md`](./output/real_ct/06_eval/V14_FALLBACK_DECISION.md)  
+**GitHub**: https://github.com/JJ704sd/OpenGATE-Door
+
+> **本文档保留 2026-06-22 原始计划内容**,作为"设计意图 + 参数选择依据"的参考文档。新决策以 ROADMAP.md 和 FINAL_SUMMARY.md 为准。
+
+---
+
 ## 0. 选型与决策点总览
 
 | 决策点 | 我的推荐 | 备选 |

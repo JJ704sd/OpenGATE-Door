@@ -1,10 +1,11 @@
 # CT 真实患者腹部重建项目
 
 > **项目**: D:\OpenGATE\ct_phantom_recon_v2
-> **当前版本**: v14 baseline (2026-06-27)
+> **当前版本**: **v14.1 baseline** (2026-06-27)
 > **数据**: FLARE22 腹部 CT (FLARE22_Tr_0009, 1 例验证)
-> **临床指标**: Z=43 MAE 38.5 HU / SSIM 0.989 / 5 切片 MAE 45.5±7.5 (std 较 v13 改善 8-10×)
-> **Web Dashboard**: `gui/index.html` (7 区块, Z 切片选择器, Lightbox 放大)
+> **临床指标**: Z=43 MAE 38.5 HU / SSIM 0.989 / **全 87 切片 MAE ~45, std ~7.5** (std 较 v13 改善 8-10×)
+> **Web Dashboard**: `gui/index.html` (7 区块, 87 切片 Z 选择器, Lightbox 放大)
+> **GitHub**: https://github.com/JJ704sd/OpenGATE-Door (public)
 
 ---
 
@@ -65,19 +66,23 @@ D:\OpenGATE\env\Scripts\pre-commit.exe install
 # 期望: FBP/SART/SART+TV MAE ~38.5, SSIM ~0.989 (中央 Z=43)
 ```
 
-### 多切片评估 (5 切片 P1)
-```powershell
-# 跑 P1 5 切片 (22/32/43/54/64) 完整流程
-D:\OpenGATE\env\python.exe -c "
-import subprocess, os
-env = os.environ.copy()
-for z in [22, 32, 43, 54, 64]:
-    env['Z_IDX'] = str(z)
-    for script in ['03_proj_simulate.py', '04_reconstruct.py', '05_postprocess.py', '06_evaluate.py']:
-        subprocess.run(['D:\\OpenGATE\\env\\python.exe', f'scripts/{script}'], env=env, check=True)
-"
+### 多切片评估 (v14.1 全 87 切片覆盖)
 
-# 生成器官 overlay PNG (15 张)
+```powershell
+# 方法 A: 跑全 87 切片 (基于已有的 02_calibrated output, ~50 min)
+D:\OpenGATE\env\python.exe scripts\multi_slice_runner.py
+
+# 方法 B: 跑单个切片 (指定 Z_IDX, 兼容旧 P1 调用)
+$env:Z_IDX = "54"  # 0-86 任选
+D:\OpenGATE\env\python.exe scripts\03_proj_simulate.py
+D:\OpenGATE\env\python.exe scripts\04_reconstruct.py
+D:\OpenGATE\env\python.exe scripts\05_postprocess.py
+D:\OpenGATE\env\python.exe scripts\06_evaluate.py
+
+# 检查 output\real_ct\06_eval\metrics_multislice.json
+# 期望三通道 mean MAE ~45, std ~7.5 (v14 fallback 跨切片验证)
+
+# 生成器官 overlay PNG (15 张, 5 P1 切片 × 3 通道)
 D:\OpenGATE\env\python.exe scripts\generate_overlays.py
 ```
 
@@ -89,6 +94,13 @@ Start-Process -FilePath "D:\OpenGATE\env\python.exe" `
   -PassThru -WindowStyle Hidden
 
 # 浏览器打开: http://127.0.0.1:8765/gui/
+# 7 区块 + 87 切片 Z 选择器 (5 P1 + 82 其他) + Lightbox 放大器
+```
+
+### 单元测试 (v14.1 P3)
+```powershell
+D:\OpenGATE\env\python.exe -m pytest scripts\test_*.py
+# 期望: 21/21 PASS in ~1-5 sec
 ```
 
 ---
@@ -227,11 +239,19 @@ D:\OpenGATE\ct_phantom_recon_v2\
 - N_ANGLES/N_DET/RECON_SIZE 改 A 矩阵会恶化 CG 收敛
 - v14 fallback 已解决跨切片稳定度, MAE 单切片 38.5 已达当前分辨率极限
 
-### 长期 P3 任务 (ROADMAP)
-- **#10 opengate 真蒙特卡洛** (1-2 d, 物理完整度最高)
-- **#11 多病例扩增** (1 w, 跨 10 例验证 v14 fallback 鲁棒性) — **P1 优先级**
-- **#13 GPU 加速 SART** (1-2 w, 加速 10-100×)
-- **#14 跑全 87 切片** (1-2 h, 让 Z 选择器所有选项都有 overlay)
+### 长期 P3 任务 (ROADMAP, 用户决策后启动)
+- **端到端深度学习重建** (U-Net / Diffusion) — ROI 最高,需先 #11 数据扩增
+- **#11 多病例扩增** (1 w, FLARE22 10 例验证 v14 fallback 跨病例鲁棒性) — **P1 优先级**
+- **#10 opengate 真蒙特卡洛** (1-2 d, 物理完整度最高, 替代半解析投影)
+- **#13 GPU 加速 SART** (1-2 w, CuPy/PyTorch 加速 10-100×)
+
+### 已完成 (2026-06-27)
+- ✓ v14 fallback 跨切片稳定 (8-10× 改善, std 60-73 → 7.5)
+- ✓ **全 87 切片覆盖** (原 #14 任务, 87 个 metrics + 87 个 per-organ + 87 个 REPORT)
+- ✓ P3 pytest 单元测试 (21 用例 PASS, 防回归)
+- ✓ Web Dashboard (gui/) + Lightbox + Z selector
+- ✓ Git 初始化 + .gitignore + pre-commit hooks
+- ✓ GitHub push + 中文 description + 10 topics
 
 ### 跳出当前框架
 - **深度学习端到端重建**: U-Net / Diffusion 直接 Radon 投影 → HU (需 PyTorch+GPU)

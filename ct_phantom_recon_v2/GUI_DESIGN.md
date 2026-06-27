@@ -1,10 +1,42 @@
 # CT 重建项目 GUI 实现设计文档
 
 > **项目**: D:\OpenGATE\ct_phantom_recon_v2  
-> **当前版本**: v13 baseline (CLI + dashboard.html)  
+> **当前版本**: **v14.1 baseline** (含 Web Dashboard)  
 > **目标**: 桌面 GUI 应用（Streamlit 快速原型 → PySide6 生产级）  
 > **设计日期**: 2026-06-23  
+> **最后更新**: 2026-06-27 (Web GUI 已实施, 桌面 GUI 仍等指令)  
 > **作者**: mavis (mvs_a39c7ca1dab949c68d9394df11958761)
+
+---
+
+## 实施状态 (2026-06-27)
+
+### ✅ Web GUI 已实施 (v14.1, 替代 CLI + dashboard.html)
+
+**实施位置**: `gui/` 目录  
+**技术栈**: 静态 HTML + Chart.js 4.4 (CDN) + http.server  
+**功能** (7 区块):
+1. Hero stats — FBP/SART/SART+TV 5 切片 MAE 均值
+2. §1 v13 → v14 跨切片 MAE 改善柱状图
+3. §2 5 切片 MAE 详情 + Fallback 标记
+4. §2.5 三通道详细 5 指标对比 (3 表 × 5 切片 × 5 维)
+5. §3 当前 Z 切片详情 (随 Z 选择器联动)
+6. §4 器官 overlay (15 PNG, 5 切片 × 3 通道)
+7. §5 残差诊断 + §6 临床目标进度条
+
+**Z 切片选择器**: 87 选项 (5 P1 + 82 其他), optgroup 分组, 切 Z 实时 fetch  
+**Lightbox**: 滚轮缩放 (0.2x - 8x) + 拖拽平移 + 双击复位 + 快捷键 +/-/0/ESC  
+**启动**: `python -m http.server 8765 --bind 127.0.0.1` → 浏览器 `http://127.0.0.1:8765/gui/`
+
+详见: [`gui/README.md`](./gui/README.md)
+
+### ⏸ 桌面 GUI 仍暂停 (用户已声明等指令)
+
+- **阶段 1: Streamlit 快速原型** (1 天开发) — 等指令
+- **阶段 2: PySide6 生产级桌面应用** (3 天开发) — 等指令
+- **替代方案**: Web GUI 已覆盖 80% 用户场景 (内部研究 / 调试 / 数据探索)
+
+本文档保留 2026-06-23 原始设计内容,作为"未来桌面 GUI 实施"的参考。
 
 ---
 

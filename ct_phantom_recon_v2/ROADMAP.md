@@ -865,21 +865,21 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 
 ### 下一轮候选
 
-| # | 任务 | 耗时 | 优先级 |
-|---|---|---|---|
-| 1 | 跑全 87 切片 (multi_slice_runner 循环 + generate_overlays) | 1-2 h | P1 |
-| 2 | §3 localStorage 缓存 (切 Z 零延迟) | 2 h | P2 |
-| 3 | §5 残差诊断扩展 (任意 Z 看残差) | 4 h | P2 |
-| 4 | 对比模式 (选 2 Z 并排) | 1 d | P3 |
-| 5 | 导出 PDF/PNG 报告 (给临床医生) | 1 d | P3 |
-| 6 | GitHub remote + push (SSH 通道) | 1 h | P1 |
-| 7 | v15 深度学习预研 (PyTorch 环境) | 1 d | P3 |
+| # | 任务 | 耗时 | 优先级 | 状态 |
+|---|---|---|---|---|
+| 1 | 跑全 87 切片 (multi_slice_runner 循环 + generate_overlays) | 1-2 h | P1 | ✅ **已完成** (commit bc8130b + b892077) |
+| 2 | §3 localStorage 缓存 (切 Z 零延迟) | 2 h | P2 | 待启动 |
+| 3 | §5 残差诊断扩展 (任意 Z 看残差) | 4 h | P2 | 待启动 |
+| 4 | 对比模式 (选 2 Z 并排) | 1 d | P3 | 待启动 |
+| 5 | 导出 PDF/PNG 报告 (给临床医生) | 1 d | P3 | 待启动 |
+| 6 | GitHub remote + push | 1 h | P1 | ✅ **已完成** (commit 39f7ebb + fd7f71a + b892077 + 中文 description PATCH) |
+| 7 | v15 深度学习预研 (PyTorch 环境) | 1 d | P3 | 等用户指令 |
 
 ---
 
-*日期: 2026-06-27 15:30*
-*v14 baseline 完整 (fallback + dashboard + git)*
-*下一步: 等用户选下一轮任务 (当前推荐 #1 跑全 87 切片)*
+*日期: 2026-06-27*
+*v14.1 baseline 完整 (fallback + 87-slice 全覆盖 + dashboard + git + GitHub push)*
+*下一步: 等用户选下一轮任务 (#2/#3/#4/#5 Web Dashboard 增强,或 v15 深度学习方向)*
 
 ---
 
@@ -907,21 +907,29 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 
 ```
 output/real_ct/06_eval/
-├── metrics.json                              ← 当前活跃 (v13 baseline)
+├── metrics.json                              ← 当前活跃 (v14.1 baseline, Z=43 中央)
+├── metrics_z<Z>.json (×87)                    ← 全 87 切片单指标 (v14.1 全覆盖)
+├── per_organ_hu_z<Z>.json (×87)               ← 全 87 切片器官 HU 分布
+├── metrics_multislice.json                    ← v14 fallback 跨切片汇总
+├── REPORT.md                                  ← 当前评估报告 (Z=43 中央)
+├── REPORT_z<Z>.md (×87)                       ← 全 87 切片人读报告
+├── MULTI_SLICE_REPORT.md                      ← v14 跨切片报告
+├── V14_FALLBACK_DECISION.md                   ← v14 fallback 决策报告
 ├── metrics_v{4,5,6,7,8,9,11,13}_baseline.json  ← 8 个版本基线
-├── metrics_v{10×3,12,v14b/c/d}_*.json        ← 6 个 FAIL 教训留底
-├── per_organ_hu.json                          ← 当前活跃
+├── metrics_v{10×3,12,v14a/b/c/d}_*.json        ← 8 个 FAIL 教训留底
+├── per_organ_hu.json                          ← 当前活跃 (Z=43)
 ├── per_organ_hu_v{8,9}_*.json                ← 历史 per-organ
 ├── per_organ_hu_v10_*_attempt.json (×3)       ← FAIL 教训 per-organ
 ├── _v13_scan_summary.json                    ← v13 8 组参数扫描汇总
 ├── _tv_scan_metrics.json                     ← v8/v9 TV weight 扫描
-├── REPORT.md                                  ← 当前评估报告
 ├── v5_baseline_report.md                     ← v5 详细报告
-├── _cleanup_changelog_v13_baseline.json      ← 本次清理审计
-├── error_maps/                                ← 错误图
+├── diagnostic_v13_residual.json              ← Z=43 残差诊断
+├── _cleanup_changelog_v13_baseline.json      ← 冗余 metrics 清理审计
+├── overlays/                                  ← 15 张器官 overlay PNG (5 切片 × 3 通道)
+├── error_maps/                                ← 误差热图
 └── _trash_2026_06_27_v13_cleanup/             ← 回收站 (37 个)
 ```
 
 ### 状态
 
-✓ v13 baseline 永久锁定, 环境验证 PASS, 评估目录清洁 (22 个有效文件, 回收站 37 个可恢复)
+✓ v14.1 baseline 永久锁定 (含 fallback + 87-slice 全覆盖), 环境验证 PASS, 评估目录清洁
