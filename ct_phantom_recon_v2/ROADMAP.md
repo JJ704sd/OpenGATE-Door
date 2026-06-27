@@ -661,7 +661,7 @@ scripts/
 - `output/real_ct/06_eval/REPORT_z<Z>.md` (5 个 per-slice)
 - `output/real_ct/06_eval/error_fbp_z<Z>.png` (5 个误差热图)
 - 4 个生产脚本支持 `Z_IDX` 环境变量 (03/04/05/06)
-- Wrapper: `scratchpad/multi_slice_runner.py`
+- Wrapper: `scripts/run_all_87_slices.py` (start_z [end_z] 参数化)
 
 ---
 
@@ -867,7 +867,7 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 
 | # | 任务 | 耗时 | 优先级 | 状态 |
 |---|---|---|---|---|
-| 1 | 跑全 87 切片 (multi_slice_runner 循环 + generate_overlays) | 1-2 h | P1 | ✅ **已完成** (commit bc8130b + b892077) |
+| 1 | 跑全 87 切片 (run_all_87_slices.py 循环 + generate_overlays) | 1-2 h | P1 | ✅ **已完成** (commit bc8130b + b892077) |
 | 2 | §3 localStorage 缓存 (切 Z 零延迟) | 2 h | P2 | 待启动 |
 | 3 | §5 残差诊断扩展 (任意 Z 看残差) | 4 h | P2 | 待启动 |
 | 4 | 对比模式 (选 2 Z 并排) | 1 d | P3 | 待启动 |

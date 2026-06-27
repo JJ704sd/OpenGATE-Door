@@ -70,7 +70,7 @@ D:\OpenGATE\env\Scripts\pre-commit.exe install
 
 ```powershell
 # 方法 A: 跑全 87 切片 (基于已有的 02_calibrated output, ~50 min)
-D:\OpenGATE\env\python.exe scripts\multi_slice_runner.py
+D:\OpenGATE\env\python.exe scripts\run_all_87_slices.py 0 87
 
 # 方法 B: 跑单个切片 (指定 Z_IDX, 兼容旧 P1 调用)
 $env:Z_IDX = "54"  # 0-86 任选
