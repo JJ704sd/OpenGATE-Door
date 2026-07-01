@@ -39,7 +39,7 @@ OpenGATE-Door/
 │   │   ├── 06_evaluate.py       (支持 Z_IDX 多切片)
 │   │   ├── _checkpoints.py      共享检查模块
 │   │   ├── generate_overlays.py 器官 overlay PNG 生成器
-│   │   ├── multi_slice_runner.py 5/87 切片 runner
+│   │   ├── run_all_87_slices.py 87 切片 runner (start_z [end_z] 命令行参数化)
 │   │   └── test_*.py            pytest 单元测试 (21 用例)
 │   ├── gui/                    Web 仪表板 (HTML/CSS/JS, v14.1 新增)
 │   │   ├── index.html          7 区块 + Z 选择器 + Lightbox
@@ -88,7 +88,7 @@ Python: D:\OpenGATE\env\python.exe (numpy 2.2.6, scipy 1.15.3, SimpleITK 2.5.5)
 # 浏览器打开: http://127.0.0.1:8765/gui/
 
 # 跑全 87 切片 (可选, ~50 min, 基于已有的 02_calibrated output)
-& D:\OpenGATE\env\python.exe ct_phantom_recon_v2\scripts\multi_slice_runner.py
+& D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scripts\run_all_87_slices.py 0 87
 ```
 
 ---
