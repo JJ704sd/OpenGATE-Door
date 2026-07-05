@@ -57,9 +57,10 @@ D:\OpenGATE\env\python.exe scripts\06_evaluate.py
 ```powershell
 # 一次性安装 (项目开发者)
 D:\OpenGATE\env\python.exe -m pip install pre-commit
-D:\OpenGATE\env\Scripts\pre-commit.exe install
+# 注意: .pre-commit-config.yaml 在子项目目录, 必须 cd 到这里再 install
+D:\OpenGATE\env\Scripts\pre-commit.exe install  # 当前 cwd = ct_phantom_recon_v2/
 
-# 自动触发: 改 scripts/ 或 tests/ 后 git commit 时跑 pytest 21/21, 不通过则拦截
+# 启用后自动触发: 改 scripts/ 或 tests/ 后 git commit 时跑 pytest 19/19, 不通过则拦截
 # 跳过: 紧急情况 git commit --no-verify -m "..."
 # 手动跑: D:\OpenGATE\env\Scripts\pre-commit.exe run --all-files
 # 配置: .pre-commit-config.yaml (pytest + 6 个 hygiene: trailing-whitespace / end-of-file / merge-conflict / large-files / yaml / json)
@@ -100,7 +101,7 @@ Start-Process -FilePath "D:\OpenGATE\env\python.exe" `
 ### 单元测试 (v14.1 P3)
 ```powershell
 D:\OpenGATE\env\python.exe -m pytest scripts\test_*.py
-# 期望: 21/21 PASS in ~1-5 sec
+# 期望: 19/19 PASS in ~1-5 sec
 ```
 
 ---
@@ -128,7 +129,7 @@ D:\OpenGATE\ct_phantom_recon_v2\
 │   ├── _checkpoints.py           共享检查模块
 │   ├── _eval_tv_scan.py          TV weight 参数扫描工具
 │   ├── generate_overlays.py      器官 overlay PNG 生成器 (15 张)
-│   ├── test_*.py                 7 个 pytest 测试 (21 测试 PASS)
+│   ├── test_*.py                 7 个 pytest 测试 (19 测试 PASS)
 │   └── *_backup.py               12 个版本快照 (v5-v13, 无 git 历史追溯, 保留作参考)
 ├── output\real_ct\               流程输出
 │   ├── 01_raw\                   FLARE22 NIfTI 原始 (gitignore)
@@ -248,7 +249,7 @@ D:\OpenGATE\ct_phantom_recon_v2\
 ### 已完成 (2026-06-27)
 - ✓ v14 fallback 跨切片稳定 (8-10× 改善, std 60-73 → 7.5)
 - ✓ **全 87 切片覆盖** (原 #14 任务, 87 个 metrics + 87 个 per-organ + 87 个 REPORT)
-- ✓ P3 pytest 单元测试 (21 用例 PASS, 防回归)
+- ✓ P3 pytest 单元测试 (19 用例 PASS, 防回归)
 - ✓ Web Dashboard (gui/) + Lightbox + Z selector
 - ✓ Git 初始化 + .gitignore + pre-commit hooks
 - ✓ GitHub push + 中文 description + 10 topics
@@ -295,4 +296,4 @@ D:\OpenGATE\env\python.exe scripts\06_evaluate.py
 - **执行人**: mavis (MiniMax Agent team leader)
 - **完成日期**: 2026-06-27 15:30
 - **变更**: 2026-06-23 (v13 baseline) → 2026-06-27 (v14 baseline + web dashboard)
-- **Git**: 已初始化 (2026-06-27), root commit 9a3c05c
+- **Git**: 已初始化 (2026-06-27), root commit `dc0223a` (Initial), v14 baseline commit `edaaa7b`

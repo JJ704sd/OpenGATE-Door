@@ -66,10 +66,8 @@ output/real_ct/05_post/calibration_log_*.json
 # ============ 评估中间 (重生成) ============
 output/real_ct/06_eval/error_maps/
 
-# ============ PPT 制作工作区 (一次性产出) ============
-ppt_workspace/node_modules/
-ppt_workspace/slides/*.pptx
-ppt_workspace/slides/*.pdf
+# ============ PPT 制作工作区 (一次性产出, 不入仓) ============
+ppt_workspace/
 
 # ============ 任务规划 (占位代码, 不进生产) ============
 tasks/gui/stage*/**/__pycache__/

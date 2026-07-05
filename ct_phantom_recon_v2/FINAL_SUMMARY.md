@@ -52,7 +52,7 @@
 | **v13** | **2026-06-23** | **38.56** | **0.989** | **38.57** | **0.989** | **后处理弱高斯 σ=0.3 + 临床 HU clip [-1024, +3071]** | **PASS (单切片)** |
 | v14 (失败版) | 2026-06-23 | 38.56 | 0.989 | 38.57 | 0.989 | FBP filter 改进 (PSF / BH / CG 150 / sigma 0.4 全部 FAIL) | FAIL → 回退 v13 |
 | **v14 (fallback 版)** | **2026-06-27** | **45.98** | **0.982** | **45.36** | **0.982** | **+ SART/SART+TV Fallback (边界切片校准)** | **PASS (跨切片)** |
-| **v14.1** | **2026-06-27** | **~46** | **~0.981** | **~45** | **~0.982** | **+ 87-slice 全覆盖 + pytest 21 用例 + Web Dashboard + GitHub push** | **CURRENT** |
+| **v14.1** | **2026-06-27** | **~46** | **~0.981** | **~45** | **~0.982** | **+ 87-slice 全覆盖 + pytest 19 用例 + Web Dashboard + GitHub push** | **CURRENT** |
 
 **v4 → v14.1 总改善**: FBP MAE -89%, SSIM +107%, SNR 从 -0.2 → 6.5+;**全 87 切片可临床使用** (v13 仅中央)。
 
@@ -175,7 +175,7 @@
 ### 6.3 已完成 (2026-06-27)
 - ✓ v14 fallback 跨切片稳定 (8-10× 改善)
 - ✓ 87-slice 全覆盖 (87 个 metrics + 87 个 per-organ + 87 个 REPORT)
-- ✓ P3 pytest 单元测试 21/21 PASS (防回归)
+- ✓ P3 pytest 单元测试 19/19 PASS (防回归)
 - ✓ Web Dashboard (gui/) + Lightbox + Z selector
 - ✓ Git 初始化 + .gitignore + pre-commit hooks
 - ✓ GitHub push + 中文 description + 10 topics
@@ -204,7 +204,7 @@ D:\OpenGATE\ct_phantom_recon_v2\  (~0.6 GB, scripts/ ~120 KB)
 │   ├── _checkpoints.py                共享检查模块 (9 KB)
 │   ├── _eval_tv_scan.py               TV weight 参数扫描工具
 │   ├── generate_overlays.py           器官 overlay PNG 生成器 (15 张 P1)
-│   ├── test_*.py                      7 个 pytest 测试 (21 测试 PASS)
+│   ├── test_*.py                      7 个 pytest 测试 (19 测试 PASS)
 │   ├── run_all_87_slices.py          87 切片 runner (start_z [end_z] 命令行参数化)
 │   └── *_backup.py                    12 个版本快照 (v5-v13)
 ├── output/real_ct/
@@ -295,7 +295,7 @@ D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scripts\run_all_87_sl
 ```powershell
 D:\OpenGATE\env\python.exe -m pytest D:\OpenGATE\ct_phantom_recon_v2\scripts\test_*.py
 
-# 期望 21/21 PASS in ~1-5 sec
+# 期望 19/19 PASS in ~1-5 sec
 ```
 
 ### 8.5 启动 Web Dashboard
@@ -332,11 +332,11 @@ D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scripts\06_evaluate.p
 - metrics: v4-v13 全部 baseline 备份 + 各版本扫描/尝试备份 + v14 失败版 4 个备份
 
 ### 9.3 Git 控制
-- **本地**: D:\OpenGATE (`.git` 已初始化, `.gitignore` 76 行)
+- **本地**: D:\OpenGATE (`.git` 已初始化, `.gitignore` 62 行)
 - **远程**: https://github.com/JJ704sd/OpenGATE-Door (public)
-- **commit 历史**: 6 个 commit (edaaa7b → 39f7ebb → bc8130b → fd7f71a → b892077 + 文档同步)
+- **commit 历史**: 11 个 commit (Initial `dc0223a` → v14 baseline `edaaa7b` → round1 基础设施 `39f7ebb` + 87-slice 完整覆盖 `bc8130b` → Lightbox `fd7f71a` → 87-slice raw outputs `b892077` → docs sync `4e22247` → round2 cleanup `5586dbd` / doc fix `e45ef99` / prune test `27dd7c6` / round2 sync `fddc9bd`)
 - **branch**: main
-- **pre-commit hook**: pytest 21/21 + hygiene checks (trailing-whitespace / end-of-file / merge-conflict / large-files / yaml / json)
+- **pre-commit hook**: pytest 19/19 + 6 hygiene checks (trailing-whitespace / end-of-file / merge-conflict / large-files / yaml / json)
 
 ---
 

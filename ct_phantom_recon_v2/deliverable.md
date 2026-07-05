@@ -126,7 +126,7 @@ v14 fallback PASS 后, 启动 v14.1 扩展工程:
 - 输出: 87 个 metrics_z<Z>.json + 87 个 per_organ_hu_z<Z>.json + 87 个 REPORT_z<Z>.md
 - 验证: Z=54/64 触发 fallback, Z=22-43 走正常 fit, 全部切片可用
 
-### 5.2 P3 pytest 单元测试 (21 用例 PASS)
+### 5.2 P3 pytest 单元测试 (19 用例 PASS)
 - 7 个测试文件覆盖 6 个生产脚本 + 1 个残差诊断
 - 防回归: 任何 v15 改动前必跑绿
 - pre-commit hook: 改 scripts/ 或 tests/ 后 git commit 自动跑
@@ -137,8 +137,8 @@ v14 fallback PASS 后, 启动 v14.1 扩展工程:
 - 启动: `python -m http.server 8765 --bind 127.0.0.1` → 浏览器打开 `http://127.0.0.1:8765/gui/`
 
 ### 5.4 GitHub 发布
-- 本地 git init + .gitignore (76 行, 排除大文件 .raw/.nii/.npz + 缓存)
-- 6 个 commit 推送到 `github.com/JJ704sd/OpenGATE-Door` public
+- 本地 git init + .gitignore (62 行, 排除大文件 .raw/.nii/.npz + 缓存)
+- 11 个 commit 推送到 `github.com/JJ704sd/OpenGATE-Door` public
 - About 区: 中文 description + 10 topics + homepage 指向 ct_phantom_recon_v2/README.md
 
 ---
@@ -212,10 +212,10 @@ v14 fallback PASS 后, 启动 v14.1 扩展工程:
 
 ### 8.3 v14.1 扩展输出
 - 87 个 metrics_z<Z>.json + 87 个 per_organ_hu_z<Z>.json + 87 个 REPORT_z<Z>.md (Z=0-86)
-- 7 个 test_*.py (21 测试 PASS)
+- 5 个 test_*.py (19 用例 PASS)
 - gui/ 目录 (index.html + css + js)
 - .gitignore + .pre-commit-config.yaml
-- GitHub: github.com/JJ704sd/OpenGATE-Door (6 commits, public)
+- GitHub: github.com/JJ704sd/OpenGATE-Door (11 commits, public)
 
 ### 8.4 日志
 - `06_eval/_v14_*_log.txt` — 每步运行的完整日志

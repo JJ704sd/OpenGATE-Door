@@ -113,7 +113,7 @@ async function loadSlice(z) {
   if (!metrics) {
     setStatus(`Z=${z} 数据缺失`, "error");
     document.getElementById("single-slice-summary").textContent =
-      `Z=${z} 未在 metrics_z<Z>.json 中, 可能未通过 multi_slice_runner.py 跑过. 5 切片 (22/32/43/54/64) 已有完整数据.`;
+      `Z=${z} 未在 metrics_z<Z>.json 中, 可能未通过 run_all_87_slices.py 跑过. 5 切片 (22/32/43/54/64) 已有完整数据.`;
     document.querySelector("#single-slice-table tbody").innerHTML =
       '<tr><td colspan="6" style="text-align:center;color:var(--muted);">—</td></tr>';
     renderOverlayGrid(z, false);
@@ -168,7 +168,7 @@ function renderOverlayGrid(z, hasOverlay) {
     } else {
       card.innerHTML = `
         <div class="overlay-img-wrap" style="text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px;">
-          [ overlay 未生成 — 需要先跑 generate_overlays.py + multi_slice_runner.py ]
+          [ overlay 未生成 — 需要先跑 generate_overlays.py + run_all_87_slices.py ] 
         </div>
         <div class="overlay-meta">
           <span class="overlay-channel">${m.toUpperCase()}</span>

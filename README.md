@@ -9,11 +9,11 @@
 
 ## 项目简介 (中文)
 
-CT 真实患者腹部重建项目(v14.1 baseline)。端到端管线:FLARE22 NIfTI → HU 标定 → 5 能箱 Radon 投影 → FBP / SART / SART+TV → MAE / SSIM / SNR / CNR 评估。21 用例 pytest 套件覆盖核心算法。
+CT 真实患者腹部重建项目(v14.1 baseline)。端到端管线:FLARE22 NIfTI → HU 标定 → 5 能箱 Radon 投影 → FBP / SART / SART+TV → MAE / SSIM / SNR / CNR 评估。19 用例 pytest 套件覆盖核心算法。
 
 ## Project Summary (English)
 
-Real-patient CT abdominal reconstruction (v14.1 baseline). End-to-end pipeline: FLARE22 NIfTI → HU calibration → 5-bin Radon projection → FBP / SART / SART+TV → MAE / SSIM / SNR / CNR evaluation. 21-case pytest suite covers core algorithms.
+Real-patient CT abdominal reconstruction (v14.1 baseline). End-to-end pipeline: FLARE22 NIfTI → HU calibration → 5-bin Radon projection → FBP / SART / SART+TV → MAE / SSIM / SNR / CNR evaluation. 19-case pytest suite covers core algorithms.
 
 ---
 
@@ -40,7 +40,7 @@ OpenGATE-Door/
 │   │   ├── _checkpoints.py      共享检查模块
 │   │   ├── generate_overlays.py 器官 overlay PNG 生成器
 │   │   ├── run_all_87_slices.py 87 切片 runner (start_z [end_z] 命令行参数化)
-│   │   └── test_*.py            pytest 单元测试 (21 用例)
+│   │   └── test_*.py            pytest 单元测试 (19 用例)
 │   ├── gui/                    Web 仪表板 (HTML/CSS/JS, v14.1 新增)
 │   │   ├── index.html          7 区块 + Z 选择器 + Lightbox
 │   │   ├── css/styles.css
@@ -79,7 +79,7 @@ Python: D:\OpenGATE\env\python.exe (numpy 2.2.6, scipy 1.15.3, SimpleITK 2.5.5)
 # 检查 output\real_ct\06_eval\metrics.json
 # 期望三通道 MAE ~38.5, SSIM ~0.989 (v14.1 中央切片 baseline)
 
-# 单元测试 (P3 pytest 套件, 21 用例)
+# 单元测试 (P3 pytest 套件, 19 用例)
 & D:\OpenGATE\env\python.exe -m pytest ct_phantom_recon_v2\scripts\test_*.py
 
 # 启动 Web Dashboard
@@ -126,8 +126,8 @@ Python: D:\OpenGATE\env\python.exe (numpy 2.2.6, scipy 1.15.3, SimpleITK 2.5.5)
 - **大文件**: `.raw` / `.nii` / `.npz` 中间产物不入仓(由脚本重跑生成)
 - **Python 解释器**: 必须用绝对路径 `D:\OpenGATE\env\python.exe`,不要自动检测
 - **历史备份**: `scripts/*_backup.py` 是版本回退用的快照(保留)
-- **Git 历史**: 已初始化 (2026-06-27),6 个 commit,远程 github.com/JJ704sd/OpenGATE-Door
-- **Pre-commit hook**: pytest 21/21 + 6 个 hygiene checks 自动跑
+- **Git 历史**: 已初始化 (2026-06-27),11 个 commit,远程 github.com/JJ704sd/OpenGATE-Door
+- **Pre-commit hook**: pytest 19/19 + 6 个 hygiene checks 配置就绪（在 `ct_phantom_recon_v2/` 目录 `pre-commit install` 启用，启用后 commit 自动跑）
 
 ---
 

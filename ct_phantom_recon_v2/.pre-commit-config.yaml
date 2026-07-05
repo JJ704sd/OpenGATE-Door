@@ -10,7 +10,7 @@ repos:
   - repo: local
     hooks:
       - id: pytest
-        name: pytest (scripts/) — 21/21 必须 PASS
+        name: pytest (scripts/) — 19/19 必须 PASS
         # Windows 路径: 用 forward slash, 反斜杠会被 YAML 当 escape
         entry: D:/OpenGATE/env/python.exe -m pytest -q
         language: system

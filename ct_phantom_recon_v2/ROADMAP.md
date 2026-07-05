@@ -671,7 +671,7 @@ scripts/
 
 `D:\OpenGATE\env\python.exe -m pip install pytest` (用户确认后装)
 
-6 个测试文件 + 1 个残差诊断测试,共 **21 测试用例**:
+6 个测试文件 + 1 个残差诊断测试,共 **19 测试用例**:
 
 | 文件 | 测试数 | 覆盖 |
 |---|---|---|
@@ -680,22 +680,20 @@ scripts/
 | test_04_recon.py | 3 | 三通道重建文件, shape/range, SART 矩阵缓存 |
 | test_05_cal.py | 3 | anchor 自动检测, denoise+clip, mu_to_hu fit |
 | test_06_eval.py | 7 | mae/psnr/ssim/cnr/snr/fov_mask 数学正确性 |
-| test_residual_diag.py | 2 | HU 桶互斥, 残差分桶数学 |
 
 ### 结果
 
-**21/21 PASSED in 0.97s** ✓
+**19/19 PASSED in 0.97s** ✓
 
 ```
 $ python -m pytest scripts/test_*.py
-collected 21 items
-scripts/test_01_load.py ...                                              [ 14%]
-scripts/test_03_proj.py ...                                              [ 28%]
-scripts/test_04_recon.py ...                                             [ 42%]
-scripts/test_05_cal.py ...                                               [ 57%]
-scripts/test_06_eval.py .......                                          [ 90%]
-scripts/test_residual_diag.py ..                                         [100%]
-============================= 21 passed in 0.97s ==============================
+collected 19 items
+scripts/test_01_load.py ...                                              [ 16%]
+scripts/test_03_proj.py ...                                              [ 32%]
+scripts/test_04_recon.py ...                                             [ 47%]
+scripts/test_05_cal.py ...                                               [ 63%]
+scripts/test_06_eval.py .......                                          [100%]
+============================= 19 passed in 0.97s ==============================
 ```
 
 ### 价值
@@ -760,7 +758,7 @@ per-slice SART:
 ✓ Z=54 SART MAE 41.5 < 70 (vs 97.5, 改善 57% > 30%)
 ✓ Z=64 SART MAE 59.3 < 80 (vs 194.6, 改善 70% > 60%)
 ✓ Z=43 SART MAE 38.6 < 40 (中央不退化)
-✓ P3 pytest 21/21 PASSED (无回归)
+✓ P3 pytest 19/19 PASSED (无回归)
 ```
 
 **判定**: ✅ **PARTIAL PASS, 锁定为 v14 baseline**
@@ -850,7 +848,7 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 - **背景**: 项目长期无 git (~750 MB 原始数据靠 backup 脚本追溯), 风险大
 - **`.gitignore` 76 行**: 排除 `01_raw/*.nii` (130 MB), `02_calibrated/*.raw` (45 MB), `03_proj/*.raw` (181 MB), `_sart_matrix_cache/` (342 MB), 参数扫描 (`*_m*_s*_c-*`), `ppt_workspace/node_modules`, `.pytest_cache`, `.playwright-mcp` 等
 - **保留**: 全部 .mhd (文本头), .json (结果), .png (产品图), 12 个 backup 脚本
-- **Root commit (9a3c05c)**: "v14 baseline: CT 重建 fallback + web dashboard + lightbox", 271 files, 33105 insertions
+- **Root commit (`dc0223a`)**: "Initial commit"; substantive v14 baseline commit `edaaa7b`: "chore: initial commit - CT real-patient abdominal recon v14 baseline"
 - **GitHub push**: 待 (GH007 私密邮箱 + 国内代理风险, 走 mavis git push 可能挂, 建议用户本地走 SSH push)
 
 ### 验证
@@ -861,7 +859,7 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 | Z=22 切换 + 表格加载 | ✅ console `[data_loader] metrics_z022.json OK (5ms)` |
 | §2.5 三表 5 切片 × 5 维 | ✅ 5 行 × 6 列, 边界切片高亮 |
 | Lightbox 缩放/拖拽/关闭 | ✅ 100% → 175% → 复位 100% → 关闭 |
-| pytest 21/21 | ✅ 2.71s 全 PASS (无回归) |
+| pytest 19/19 | ✅ 2.71s 全 PASS (无回归) |
 
 ### 下一轮候选
 

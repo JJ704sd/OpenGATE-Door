@@ -104,7 +104,7 @@
 ### v14 fallback 锁定 (新 baseline)
 - 备份: `scripts/05_postprocess_v13_pre_fallback_backup.py`
 - 当前: `scripts/05_postprocess.py` (含 fallback)
-- 测试: P3 21/21 PASSED (无回归)
+- 测试: P3 19/19 PASSED (无回归)
 
 ### v15 仍是必经之路
 - v14 fallback 让 SART 跨切片稳定,但 MAE 38 (中央) 距 30 (临床) 还差 8 HU

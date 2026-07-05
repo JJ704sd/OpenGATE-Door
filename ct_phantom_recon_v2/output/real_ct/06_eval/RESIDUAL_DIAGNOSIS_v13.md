@@ -157,7 +157,7 @@ FLARE22 0001~0099 扩到 10 例, 验证 v13 跨病例稳定性:
 
 - `output/real_ct/06_eval/diagnostic_v13_residual.json` — 完整数据
 - `output/real_ct/06_eval/diagnostic_v13_residual.png` — 4 子图 (per-organ / per-HU-bucket / per-radial / error map)
-- 诊断脚本: scratchpad `diag_v13_residual.py`
+- 诊断脚本: 残差分桶函数已并入 [V14_FALLBACK_DECISION.md](./V14_FALLBACK_DECISION.md) 校准流程（v13 scratchpad 脚本已下线）
 
 ---
 

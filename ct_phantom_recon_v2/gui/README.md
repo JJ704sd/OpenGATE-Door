@@ -58,7 +58,7 @@ Start-Process -FilePath "D:\OpenGATE\env\python.exe" `
 
 ## 4. 数据更新流程
 
-如果重新跑了 `multi_slice_runner.py` 或 `06_evaluate.py`:
+如果重新跑了 `run_all_87_slices.py` 或 `06_evaluate.py`:
 - **F5 刷新浏览器** (fetch 加了 `cache: no-store`)
 - **新增 overlay PNG**: `D:\OpenGATE\env\python.exe scripts\generate_overlays.py` (5 切片 × 3 通道 = 15 张)
 
@@ -115,10 +115,10 @@ Get-NetTCPConnection -LocalPort 8765 -ErrorAction SilentlyContinue |
   ForEach-Object { Stop-Process -Id $_ -Force }
 
 # 重新生成 overlay (改了 03-06 后)
-D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scratchpads\generate_overlays.py
+D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scripts\generate_overlays.py
 
 # 重跑 5 切片 (改了 03-06 后)
-D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scratchpads\multi_slice_runner.py
+D:\OpenGATE\env\python.exe D:\OpenGATE\ct_phantom_recon_v2\scripts\run_all_87_slices.py
 ```
 
 ---
