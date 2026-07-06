@@ -127,9 +127,8 @@ D:\OpenGATE\ct_phantom_recon_v2\
 │   ├── 05_postprocess.py         **v14 fallback** + P95 anchor + A_MIN + 弱高斯 + HU clip
 │   ├── 06_evaluate.py            MAE/PSNR/SSIM/CNR/SNR + 器官 HU 评估 (支持 Z_IDX)
 │   ├── _checkpoints.py           共享检查模块
-│   ├── _eval_tv_scan.py          TV weight 参数扫描工具
 │   ├── generate_overlays.py      器官 overlay PNG 生成器 (15 张)
-│   ├── test_*.py                 7 个 pytest 测试 (19 测试 PASS)
+│   ├── test_*.py                 5 个 pytest 测试 (19 用例 PASS)
 │   └── *_backup.py               12 个版本快照 (v5-v13, 无 git 历史追溯, 保留作参考)
 ├── output\real_ct\               流程输出
 │   ├── 01_raw\                   FLARE22 NIfTI 原始 (gitignore)

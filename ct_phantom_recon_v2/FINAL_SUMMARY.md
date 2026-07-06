@@ -202,9 +202,8 @@ D:\OpenGATE\ct_phantom_recon_v2\  (~0.6 GB, scripts/ ~120 KB)
 │   ├── 05_postprocess.py              v7 10 点 fit + v11 P95 anchor + A_MIN + v13 弱高斯 + v14 fallback (19 KB)
 │   ├── 06_evaluate.py                 MAE/PSNR/SSIM/CNR/SNR + 器官 HU 评估 + Z_IDX (17 KB)
 │   ├── _checkpoints.py                共享检查模块 (9 KB)
-│   ├── _eval_tv_scan.py               TV weight 参数扫描工具
 │   ├── generate_overlays.py           器官 overlay PNG 生成器 (15 张 P1)
-│   ├── test_*.py                      7 个 pytest 测试 (19 测试 PASS)
+│   ├── test_*.py                      5 个 pytest 测试 (19 用例 PASS)
 │   ├── run_all_87_slices.py          87 切片 runner (start_z [end_z] 命令行参数化)
 │   └── *_backup.py                    12 个版本快照 (v5-v13)
 ├── output/real_ct/

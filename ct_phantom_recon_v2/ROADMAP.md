@@ -846,10 +846,10 @@ v14 fallback PASS 后用户启动 GUI 实施 (A+B):
 
 #### E. Git 仓库初始化
 - **背景**: 项目长期无 git (~750 MB 原始数据靠 backup 脚本追溯), 风险大
-- **`.gitignore` 76 行**: 排除 `01_raw/*.nii` (130 MB), `02_calibrated/*.raw` (45 MB), `03_proj/*.raw` (181 MB), `_sart_matrix_cache/` (342 MB), 参数扫描 (`*_m*_s*_c-*`), `ppt_workspace/node_modules`, `.pytest_cache`, `.playwright-mcp` 等
+- **`.gitignore` 62 行**: 排除 `01_raw/*.nii` (130 MB), `02_calibrated/*.raw` (45 MB), `03_proj/*.raw` (181 MB), `_sart_matrix_cache/` (342 MB), 参数扫描 (`*_m*_s*_c-*`), `ppt_workspace/node_modules`, `.pytest_cache`, `.playwright-mcp` 等
 - **保留**: 全部 .mhd (文本头), .json (结果), .png (产品图), 12 个 backup 脚本
 - **Root commit (`dc0223a`)**: "Initial commit"; substantive v14 baseline commit `edaaa7b`: "chore: initial commit - CT real-patient abdominal recon v14 baseline"
-- **GitHub push**: 待 (GH007 私密邮箱 + 国内代理风险, 走 mavis git push 可能挂, 建议用户本地走 SSH push)
+- **GitHub push**: 已推送 (HEAD `d8db4ba`, 11 commits via schannel + 国内代理 + `Start-Sleep 30` + `ls-remote` 探活 SOP), 详见根目录 `AGENTS.md` 的 Post-PR-merge wrap-up
 
 ### 验证
 
