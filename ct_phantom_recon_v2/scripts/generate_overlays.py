@@ -2,7 +2,7 @@
 generate_overlays.py  ——  器官 overlay PNG 生成 (前端静态资源)
 ==================================================================
 输出: output/real_ct/06_eval/overlays/overlay_z<Z>_<method>.png
-       (5 切片 × 3 通道 = 15 张)
+       (全 87 切片 × 3 通道 = 261 张)
 
 每个 PNG: 4 子图
   [0] truth HU (256×256, 软组织窗)

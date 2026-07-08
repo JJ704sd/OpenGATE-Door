@@ -60,7 +60,7 @@ Start-Process -FilePath "D:\OpenGATE\env\python.exe" `
 
 如果重新跑了 `run_all_87_slices.py` 或 `06_evaluate.py`:
 - **F5 刷新浏览器** (fetch 加了 `cache: no-store`)
-- **新增 overlay PNG**: `D:\OpenGATE\env\python.exe scripts\generate_overlays.py` (5 切片 × 3 通道 = 15 张)
+- **新增 overlay PNG**: `D:\OpenGATE\env\python.exe scripts\generate_overlays.py` (全 87 切片 × 3 通道 = 261 张)
 
 ---
 
@@ -76,14 +76,14 @@ gui/
 │   ├── charts.js       5 个 Chart.js 图
 │   └── main.js         入口 + Z 选择器 + overlay grid
 ├── README.md           本文件
-└── ../output/real_ct/06_eval/overlays/  (15 PNG, 由 generate_overlays.py 生成)
+└── ../output/real_ct/06_eval/overlays/  (261 PNG, 全 87 切片 × 3 通道, 由 generate_overlays.py 生成)
 ```
 
 后端脚本:
 ```
 scripts/
 ├── 03_proj_simulate.py / 04_reconstruct.py / 05_postprocess.py / 06_evaluate.py
-└── generate_overlays.py   (一次性生成 15 张器官 overlay PNG)
+└── generate_overlays.py   (一次性生成 261 张器官 overlay PNG, 全 87 切片 × 3 通道)
 ```
 
 ---

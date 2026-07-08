@@ -387,10 +387,18 @@ def write_report(all_metrics: dict, per_organ_data: dict) -> None:
     report.append("└── 06_eval/                 量化评估 (本目录)")
     report.append("```")
 
-    out_md = os.path.join(out_dir, f"REPORT_z{Z_INDEX:03d}.md")
-    with open(out_md, "w", encoding="utf-8") as f:
+    # P0-6: 双写 — REPORT.md (总是最新 Z 覆盖) + REPORT_z<Z>.md (多切片保留)
+    out_md_z = os.path.join(out_dir, f"REPORT_z{Z_INDEX:03d}.md")
+    out_md_latest = os.path.join(out_dir, "REPORT.md")
+    with open(out_md_z, "w", encoding="utf-8") as f:
         f.write("\n".join(report))
-    print(f"  REPORT -> {out_md}")
+    # latest copy: 只在 Z=43 (中央切片, baseline) 才覆盖, 避免误覆盖有意义的多切片报告
+    if Z_INDEX == 43:
+        with open(out_md_latest, "w", encoding="utf-8") as f:
+            f.write("\n".join(report))
+        print(f"  REPORT -> {out_md_z}  + {out_md_latest} (latest=baseline Z=43)")
+    else:
+        print(f"  REPORT -> {out_md_z}  (latest=REPORT.md only updated on Z=43 baseline)")
 
 
 def main():
@@ -398,9 +406,11 @@ def main():
     print("STEP 6: 量化评估 (MAE/PSNR/SSIM/CNR/SNR + 器官级 HU)")
     print("=" * 60)
 
-    # 读真值 + mask
-    assert os.path.exists(TRUTH_CT), f"真值不存在: {TRUTH_CT}"
-    assert os.path.exists(TRUTH_MASK), f"mask 不存在: {TRUTH_MASK}"
+    # 读真值 + mask (P0-8: 用 raise 替代 assert, 防止 -O 优化剥离断言)
+    if not os.path.exists(TRUTH_CT):
+        raise FileNotFoundError(f"真值缺失 — 先跑 02_parse_and_calibrate.py: {TRUTH_CT}")
+    if not os.path.exists(TRUTH_MASK):
+        raise FileNotFoundError(f"mask 缺失 — 先跑 02_parse_and_calibrate.py: {TRUTH_MASK}")
     truth = sitk.ReadImage(TRUTH_CT)
     truth_arr = sitk.GetArrayFromImage(truth)
     truth_z = truth_arr[Z_INDEX, :, :]  # 2D
@@ -454,7 +464,7 @@ def main():
     print("STEP 6 完成 ✓")
     print(f"  评估指标: {out_dir}\\metrics{z_tag}.json")
     print(f"  器官 HU: {out_dir}\\per_organ_hu{z_tag}.json")
-    print(f"  最终报告: {out_dir}\\REPORT.md")
+    print(f"  最终报告: {out_dir}\\REPORT.md (baseline Z=43) + REPORT_z{Z_INDEX:03d}.md (per-slice)")
     print("=" * 60)
 
 

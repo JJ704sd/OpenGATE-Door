@@ -83,7 +83,7 @@ D:\OpenGATE\env\python.exe scripts\06_evaluate.py
 # 检查 output\real_ct\06_eval\metrics_multislice.json
 # 期望三通道 mean MAE ~45, std ~7.5 (v14 fallback 跨切片验证)
 
-# 生成器官 overlay PNG (15 张, 5 P1 切片 × 3 通道)
+# 生成器官 overlay PNG (261 张, 全 87 切片 × 3 通道)
 D:\OpenGATE\env\python.exe scripts\generate_overlays.py
 ```
 
@@ -127,7 +127,7 @@ D:\OpenGATE\ct_phantom_recon_v2\
 │   ├── 05_postprocess.py         **v14 fallback** + P95 anchor + A_MIN + 弱高斯 + HU clip
 │   ├── 06_evaluate.py            MAE/PSNR/SSIM/CNR/SNR + 器官 HU 评估 (支持 Z_IDX)
 │   ├── _checkpoints.py           共享检查模块
-│   ├── generate_overlays.py      器官 overlay PNG 生成器 (15 张)
+│   ├── generate_overlays.py      器官 overlay PNG 生成器 (全 87 切片 × 3 通道 = 261 张)
 │   ├── test_*.py                 5 个 pytest 测试 (19 用例 PASS)
 │   └── *_backup.py               12 个版本快照 (v5-v13, 无 git 历史追溯, 保留作参考)
 ├── output\real_ct\               流程输出
@@ -144,7 +144,7 @@ D:\OpenGATE\ct_phantom_recon_v2\
 │       ├── REPORT.md + REPORT_z<Z>.md  评估报告 (P1 5 切片)
 │       ├── diagnostic_v13_residual.json  Z=43 残差诊断
 │       ├── V14_FALLBACK_DECISION.md      v14 决策报告
-│       └── overlays\             15 张器官 overlay PNG (5 切片 × 3 通道)
+│       └── overlays\             261 张器官 overlay PNG (全 87 切片 × 3 通道)
 ├── gui\                          **v14 新增**: Web dashboard
 │   ├── index.html                主页面 (7 区块 + Z 选择器 + Lightbox)
 │   ├── css\styles.css            美学
