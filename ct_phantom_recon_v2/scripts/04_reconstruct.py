@@ -95,7 +95,7 @@ SART_CG_ITER_OVERRIDE = 60 # v9 #1 fallback: 保留 v8 60 iter 用于回退
 SART_CG_TOL = 1e-4         # CG 收敛容忍 (scipy default 1e-5 偏严, 1e-4 平衡速度)
 SART_MATRIX_CACHE = True   # True=缓存 A 到磁盘 (避免重复构建)
 SART_CACHE_DIR = os.path.join(out_dir, "_sart_matrix_cache")
-SART_RELAX_OVERRIDE = 1.2  # SIRT 过松弛 (1.0=标准, >1=加速; 1.2 平衡速度与稳定)
+SART_RELAX_OVERRIDE = 1.0  # v14.2 P0-4: SIRT 松弛因子改回标准 1.0 (1.2 是过冲, 与 P0-3 几何错配协同放大不稳定)
 
 # 探测器 FOV mask: 边缘 halo 起源
 # n_det=256, 重建图 256×256 @ 1mm pitch → FOV 直径 = 256 mm
@@ -398,7 +398,10 @@ def build_system_matrix(n_angles, n_det, n_pixels, pixel_size, sod=541.0, sdd=94
             # 探测器点: 沿源-中心方向移到对面, 然后沿切向偏移
             det_center = -src * (R_far / np.linalg.norm(src)) * (R_far / R_far)
             # 简化: 探测器中心 = 源的反向点 + 0 (远场), 偏移沿切向
-            det = src * (-1.0) + np.array([tan_x, tan_y]) * offset
+            # v14.2 P0-3 fix: 几何与 FBP / 03_proj 一致 —— 改用 2*offset 让 t_perp = offset
+            #   原: det = -src + offset * tan → t_perp = offset/2 (factor 2 错配)
+            #   改: det = -src + 2*offset * tan → t_perp = offset (R→∞ 极限)
+            det = src * (-1.0) + np.array([tan_x, tan_y]) * (2.0 * offset)
             # ray trace
             pix_dict = siddon_ray_trace(src, det, n_pixels, pixel_size, fov_radius)
             row = i * n_det + j
@@ -416,12 +419,15 @@ def build_system_matrix(n_angles, n_det, n_pixels, pixel_size, sod=541.0, sdd=94
 def _get_cached_or_build_matrix(n_angles, n_det, n_pixels, pixel_size):
     """
     读取或构建系统矩阵 A (带磁盘缓存).
-    缓存文件: <SART_CACHE_DIR>/A_n{n_angles}x{n_det}x{n_pixels}_p{pixel_size}.npz
+    缓存文件: <SART_CACHE_DIR>/A_n{n_angles}x{n_det}x{n_pixels}_p{pixel_size}_v14_2.npz
+
+    v14.2 版本: 加入 _v14_2 后缀, 让 v14.2 几何修正 (P0-3 fix: 2*offset) 与旧版本区隔
+    (旧缓存因几何错配, 必须重新生成)
     """
     os.makedirs(SART_CACHE_DIR, exist_ok=True)
     cache_file = os.path.join(
         SART_CACHE_DIR,
-        f"A_n{n_angles}x{n_det}x{n_pixels}_p{pixel_size:.3f}.npz"
+        f"A_n{n_angles}x{n_det}x{n_pixels}_p{pixel_size:.3f}_v14_2.npz"
     )
     if SART_MATRIX_CACHE and os.path.exists(cache_file):
         print(f"  [缓存命中] 读取 {cache_file}")
@@ -484,13 +490,20 @@ def sart_sirt_reconstruct(sinogram, n_iter=SART_CG_ITER, relax=SART_RELAX_OVERRI
     C_diag = 1.0 / col_sum_safe  # shape (n_pixels²,)
     print(f"    row_sum: min={row_sum.min():.3f}, max={row_sum.max():.3f}")
     print(f"    col_sum: min={col_sum.min():.3f}, max={col_sum.max():.3f}")
-    # 4. 零初始化 (从零开始, 让 SIRT 自然上升)
-    print(f"  [4/5] 零初始化 x0 ...")
-    x = np.zeros(n_inner, dtype=np.float64)
-    print(f"    x0 = zeros, 等待 SIRT 自然收敛")
-    # 5. SIRT 迭代
+    # 4. v14.2 P0-4 fix: 均匀小正向初始 (避免 zero-init 起步慢 + 配合 P0-3 几何修复)
+    # 原: x = zeros → 等几何 fix 后, zero-init 完全乱 (A·0=0, residual=b 全残)
+    # 改: uniform small positive initial = b.mean() / average_pixel_path_length
+    print(f"  [4/5] v14.2 物理初值 ...")
+    row_sum_mean = float(row_sum_safe.mean())
+    initial_uniform = max(0.001, float(b.mean()) / max(row_sum_mean, 1e-9))
+    x = np.full(n_inner, initial_uniform, dtype=np.float64)
+    print(f"    x0 = uniform({initial_uniform:.6f}), 配合 P0-3 fix warm start")
+    # 5. SIRT 迭代 (v14.2 P0-4 fix: 加收敛监测 + 跳出)
     print(f"  [5/5] SIRT 迭代 (max {n_iter}, relax={relax}) ...")
     t_sirt = time.time()
+    b_norm = float(np.linalg.norm(b))
+    tolerance = SART_CG_TOL  # 复用 CG tol (1e-4)
+    last_err = None
     for it in range(n_iter):
         # 残差 r = b - A x
         Ax = A @ x
@@ -507,8 +520,13 @@ def sart_sirt_reconstruct(sinogram, n_iter=SART_CG_ITER, relax=SART_RELAX_OVERRI
         np.clip(x, 0, None, out=x)
         if (it + 1) % 10 == 0 or it == 0:
             # 监控残差
-            err = np.linalg.norm(residual) / max(np.linalg.norm(b), 1e-9)
+            err = float(np.linalg.norm(residual)) / max(b_norm, 1e-9)
             print(f"    iter {it + 1}/{n_iter}: rel_residual = {err:.4e}")
+            # v14.2 P0-4: 收敛监测 — 连续 2 个 iter 改善 < 5% 视为收敛
+            if last_err is not None and abs(err - last_err) < tolerance * 0.5:
+                print(f"    [converged @ iter {it + 1}], tolerance reached")
+                break
+            last_err = err
     elapsed = time.time() - t_sirt
     print(f"    SIRT 迭代总耗时 {elapsed:.1f}s")
     # reshape
