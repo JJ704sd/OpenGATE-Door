@@ -51,13 +51,47 @@ n_fail = 0
 fails = []
 
 # 先看哪些 Z 已有 metrics_z<Z>.json, skip
+# P0-7 fix: JSON 探活, partial file 视为未完成 (避免 subprocess 残留被误判为已完成)
+def _is_valid_metrics(p):
+    """检查 metrics JSON 是否完整可解析 + 清理对应 .part 残留"""
+    if not os.path.exists(p):
+        return False
+    try:
+        with open(p, encoding="utf-8") as f:
+            json.load(f)
+        return True
+    except (json.JSONDecodeError, ValueError):
+        # partial file 残留, 清理 + 标记为未完成
+        log(f"  ⚠ partial metrics 残留: {p} (清理后重跑)")
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+        # 同步清理 .part 残留
+        part = p + ".part"
+        if os.path.exists(part):
+            try:
+                os.remove(part)
+            except OSError:
+                pass
+        # 同步清理对应的 per_organ_hu (依赖 metrics 的下游)
+        z_id = os.path.basename(p).replace("metrics_z", "").replace(".json", "")
+        organ = os.path.join(base_dir, "output", "real_ct", "06_eval", f"per_organ_hu_z{z_id}.json")
+        for stale in [organ, organ + ".part"]:
+            if os.path.exists(stale):
+                try:
+                    os.remove(stale)
+                except OSError:
+                    pass
+        return False
+
 existing = set()
 for z in range(start_z, end_z):
     p = os.path.join(base_dir, "output", "real_ct", "06_eval", f"metrics_z{z:03d}.json")
-    if os.path.exists(p):
+    if _is_valid_metrics(p):
         existing.add(z)
         n_skip += 1
-log(f"Skip {n_skip} already-done Z: {sorted(existing)[:10]}{'...' if len(existing)>10 else ''}")
+log(f"Skip {n_skip} already-done Z (JSON 探活): {sorted(existing)[:10]}{'...' if len(existing)>10 else ''}")
 
 # 跑剩下
 todo = [z for z in range(start_z, end_z) if z not in existing]

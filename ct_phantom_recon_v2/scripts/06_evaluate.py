@@ -450,11 +450,28 @@ def main():
         check_eval_metrics(metrics, verbose=True)
 
     # 写 metrics (P1 多切片: 文件名带 z 后缀)
+    # P0-7 fix: 原子 rename —— 先写 .part 再 rename, 避免 partial file 被误判为已完成
     z_tag = f"_z{Z_INDEX:03d}"
-    with open(os.path.join(out_dir, f"metrics{z_tag}.json"), "w", encoding="utf-8") as f:
+    metrics_path = os.path.join(out_dir, f"metrics{z_tag}.json")
+    organ_path = os.path.join(out_dir, f"per_organ_hu{z_tag}.json")
+    metrics_tmp = metrics_path + ".part"
+    organ_tmp = organ_path + ".part"
+    # metrics
+    with open(metrics_tmp, "w", encoding="utf-8") as f:
         json.dump(all_metrics, f, ensure_ascii=False, indent=2)
-    with open(os.path.join(out_dir, f"per_organ_hu{z_tag}.json"), "w", encoding="utf-8") as f:
+        f.flush()
+        os.fsync(f.fileno())
+    if os.path.exists(metrics_path):
+        os.remove(metrics_path)  # Windows 上 rename 不允许覆盖
+    os.rename(metrics_tmp, metrics_path)
+    # per_organ_hu
+    with open(organ_tmp, "w", encoding="utf-8") as f:
         json.dump(all_organ, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    if os.path.exists(organ_path):
+        os.remove(organ_path)
+    os.rename(organ_tmp, organ_path)
 
     # 写 REPORT
     write_report(all_metrics, all_organ)
