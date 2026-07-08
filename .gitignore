@@ -74,3 +74,6 @@ ct_phantom_recon_v2/output/real_ct/06_eval/_cleanup_changelog*.json
 *.log
 *.pyc
 .cache/
+
+# mavis daemon 运行时状态 (plan state / scratchpad / hooks, 不入版本控制)
+.mavis/
