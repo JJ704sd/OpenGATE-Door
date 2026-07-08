@@ -17,7 +17,7 @@
 | §5 后处理 | ✅ + v14 fallback | v7 10 点 fit + v11 P95 anchor + A_MIN + v13 弱高斯 σ=0.3 + **v14 fallback (边界切片 a=0.04, b=MU_WATER)** |
 | §6 量化评估 | ✅ + 87-slice | MAE/PSNR/SSIM/CNR/SNR + 器官 HU,全 87 切片覆盖 |
 
-**当前版本**: v14.1 baseline (中央 Z=43: MAE 38.5 / SSIM 0.989; 全 87 切片均值 MAE ~45, std ~7.5)
+**当前版本**: v14.1 baseline (中央 Z=43: MAE 38.5 / SSIM 0.989; **P1 5 切片均值** MAE 46.0±7.8; R1 审计校正: 全 87 切片实测 MAE 66.0±42.5, 25/87 切片超临床, v14.2 R2 改进中)
 
 **完整总结**: 见 [`FINAL_SUMMARY.md`](./FINAL_SUMMARY.md) (v4 → v14.1 完整版本演进)  
 **决策日志**: 见 [`ROADMAP.md`](./ROADMAP.md) (v6 → v14.1 决策日志)  

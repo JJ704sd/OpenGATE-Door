@@ -104,14 +104,20 @@ Python: D:\OpenGATE\env\python.exe (numpy 2.2.6, scipy 1.15.3, SimpleITK 2.5.5)
 | SNR | 6.53 | 8.83 | 11.00 | > 30 | ~ 部分达成 |
 | CNR | 1.38 | 1.37 | 1.37 | > 3 | ✗ 受 256² 像素限制 |
 
-### 全 87 切片均值 (v14 fallback 关键验证)
+### P1 5 切片验证 (v14.1 fallback 关键验证)
+> **诚实澄清 (R1 audit 2026-07-08)**: 早期 README 误称 "全 87 切片 MAE ~45 std ~7.5",
+> 实际仅 **5 P1 切片 (Z=22/32/43/54/64)** 参与聚合。本表反映真实数据。
 
-| 指标 | FBP | SART | SART+TV | 跨切片 std | 状态 |
+| 指标 | FBP | SART | SART+TV | 跨切片 std (P1 5) | 状态 |
 |---|---|---|---|---|---|
-| MAE (HU) | ~46 | ~45 | ~45 | **~7.5** ✨ | ✓ 全切片可用 |
-| SSIM | ~0.981 | ~0.982 | ~0.982 | ~0.010 | ✓ **达成** |
+| MAE (HU) | 46.0 | 45.4 | 45.6 | ~7.6 ✨ (P1 5 切片) | ✓ 接受 (P1 5) |
+| SSIM | 0.982 | 0.982 | 0.982 | ~0.010 | ✓ **达成 (P1 5)** |
 
-**v14.1 vs v13 关键改进**: SART/SART+TV 跨切片稳定 (std 60-73 → 7.5, **改善 8-10×**), 边界切片"可用",全 87 切片临床可声明。
+**全 87 切片实测** (R1 audit 验证, 见 `output/real_ct/06_eval/metrics_full87_v14_2.json`):
+- FBP MAE 66.0±42.5 (5.7× std 漂移); SART/SART+TV 接近
+- 25/87 切片 MAE>60 (28.7%, 边界切片未达临床); 15/87 SSIM<0.9 (17.2%)
+
+**v14.1 vs v13 关键改进**: SART/SART+TV 跨切片稳定 (std 60-73 → 7.6, **改善 8-10×**) 仅在 P1 5 切片上成立; v14.2 R2 P0 fix 在改进全 87 切片。
 
 **详细版本演进**: 见 [`ct_phantom_recon_v2/FINAL_SUMMARY.md`](./ct_phantom_recon_v2/FINAL_SUMMARY.md) (v4 → v14.1)  
 **决策日志**: 见 [`ct_phantom_recon_v2/ROADMAP.md`](./ct_phantom_recon_v2/ROADMAP.md)  

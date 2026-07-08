@@ -1,0 +1,59 @@
+{
+  "computed_at": "2026-07-08",
+  "metrics_files": 87,
+  "p1_indices_5_slices_only": [
+    22,
+    32,
+    43,
+    54,
+    64
+  ],
+  "note": "v14.2 P0-1 fix: metrics_multislice.json 仅含 5 P1 切片聚合, 与全 87 切片统计不一致",
+  "full_87_slice_stats": {
+    "fbp": {
+      "mae_mean": 66.00107885777265,
+      "mae_std": 42.47304322473463,
+      "mae_min": 35.724761962890625,
+      "mae_max": 180.47984313964844,
+      "mae_p1_5slice_mean": 45.9906494140625,
+      "mae_p1_5slice_std": 7.780599155457186,
+      "ssim_mean": 0.9470852661406857,
+      "ssim_min": 0.7578964233398438,
+      "ssim_max": 0.9913362264633179,
+      "ssim_p1_5slice_mean": 0.9815899968147278,
+      "ssim_p1_5slice_std": 0.010132308396426953,
+      "mae_over_60_count": 25,
+      "ssim_under_0_9_count": 15
+    },
+    "sart": {
+      "mae_mean": 66.20101042999619,
+      "mae_std": 42.86216229647045,
+      "mae_min": 36.28227996826172,
+      "mae_max": 181.1350555419922,
+      "mae_p1_5slice_mean": 45.41621627807617,
+      "mae_p1_5slice_std": 7.555608586056538,
+      "ssim_mean": 0.946982833845862,
+      "ssim_min": 0.758415162563324,
+      "ssim_max": 0.9920101761817932,
+      "ssim_p1_5slice_mean": 0.9816465258598328,
+      "ssim_p1_5slice_std": 0.010163340491640045,
+      "mae_over_60_count": 24,
+      "ssim_under_0_9_count": 15
+    },
+    "sart_tv": {
+      "mae_mean": 66.3305347924945,
+      "mae_std": 42.770826761378714,
+      "mae_min": 36.21339416503906,
+      "mae_max": 180.9853973388672,
+      "mae_p1_5slice_mean": 45.60440292358398,
+      "mae_p1_5slice_std": 7.619083558230056,
+      "ssim_mean": 0.9469501540578645,
+      "ssim_min": 0.758389949798584,
+      "ssim_max": 0.9913530349731445,
+      "ssim_p1_5slice_mean": 0.9815463781356811,
+      "ssim_p1_5slice_std": 0.01025677878879012,
+      "mae_over_60_count": 24,
+      "ssim_under_0_9_count": 15
+    }
+  }
+}

@@ -3,7 +3,7 @@
 > **项目**: D:\OpenGATE\ct_phantom_recon_v2
 > **当前版本**: **v14.1 baseline** (2026-06-27)
 > **数据**: FLARE22 腹部 CT (FLARE22_Tr_0009, 1 例验证)
-> **临床指标**: Z=43 MAE 38.5 HU / SSIM 0.989 / **全 87 切片 MAE ~45, std ~7.5** (std 较 v13 改善 8-10×)
+> **临床指标**: Z=43 MAE 38.5 HU / SSIM 0.989 / **P1 5 切片 (Z=22/32/43/54/64) FBP MAE 46.0±7.8 (临床接受)** / **全 87 切片实测 FBP MAE 66.0±42.5 (25/87 切片 MAE>60, 15/87 SSIM<0.9** v14.1 边界切片未达临床标准; v14.2 P0 fix 改进中)
 > **Web Dashboard**: `gui/index.html` (7 区块, 87 切片 Z 选择器, Lightbox 放大)
 > **GitHub**: https://github.com/JJ704sd/OpenGATE-Door (public)
 
